@@ -1,4 +1,5 @@
--module(m_etp_socket_handler).
+-module (m_etp_socket_ping_handler).
+
 -behaviour(cowboy_websocket_handler).
 
 -export([init/3]).
