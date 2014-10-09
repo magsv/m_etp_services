@@ -1,0 +1,11 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.Discovery",	
+	"name": "Get",
+	"messageType": "1",
+	"protocol": "3",
+	"fields":
+	[
+		{ "name": "uri", "type": "string" }
+	]
+}

@@ -1,0 +1,6 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Datatypes",	
+	"name": "DataValue",
+	"fields": [{"name": "item", "type": [ "double",  "float",  "int",  "long",  "string",  "Energistics.Datatypes.DateTime",  "null",  "Energistics.Datatypes.ArrayOfDouble",  "boolean"] }]
+}

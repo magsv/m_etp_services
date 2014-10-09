@@ -1,0 +1,11 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.Store",	
+	"name": "Object",
+	"messageType": "3",
+	"protocol": "4",
+	"fields":
+	[
+		{ "name": "dataObjects", "type": { "type": "array", "items": "Energistics.Datatypes.Object.DataObject" } }
+	]
+}

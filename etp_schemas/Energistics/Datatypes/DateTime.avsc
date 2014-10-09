@@ -1,0 +1,10 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Datatypes",	
+	"name": "DateTime",
+	"fields":
+	[
+		{ "name": "time", "type": "long" },
+		{ "name": "offset", "type": "float" }
+	]
+}

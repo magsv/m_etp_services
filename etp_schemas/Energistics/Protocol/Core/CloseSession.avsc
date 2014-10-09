@@ -1,0 +1,11 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.Core",	
+	"name": "CloseSession",
+	"messageType": "5",
+	"protocol": "0",
+	"fields":
+	[
+		{ "name": "reason", "type": ["string", "null"] }
+	]
+}

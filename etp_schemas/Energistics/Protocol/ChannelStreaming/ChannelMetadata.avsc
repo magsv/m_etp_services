@@ -1,0 +1,11 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.ChannelStreaming",	
+	"name": "ChannelMetadata",
+	"messageType": "2",
+	"protocol": "1",
+	"fields":
+	[
+		{ "name": "channels", "type": { "type": "array", "items": "Energistics.Datatypes.ChannelData.ChannelMetadataRecord" } }
+	]
+}

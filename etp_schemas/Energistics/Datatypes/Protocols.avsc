@@ -1,0 +1,14 @@
+{
+	"type": "enum",
+	"namespace": "Energistics.Datatypes",
+	"name": "Protocols",
+	"symbols":
+	[
+		"Core",
+		"Channel_Data",
+		"Channel_Tabular",
+		"Discovery",
+		"Object_Store",
+		"Object_Query"
+	]
+}

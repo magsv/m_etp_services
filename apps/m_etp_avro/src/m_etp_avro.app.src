@@ -1,0 +1,12 @@
+{application, m_etp_avro,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { m_etp_avro_app, []}},
+  {env, []}
+ ]}.

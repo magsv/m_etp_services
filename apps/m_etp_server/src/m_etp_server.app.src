@@ -1,0 +1,12 @@
+{application, m_etp_server,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { m_etp_server_app, []}},
+  {env, []}
+ ]}.

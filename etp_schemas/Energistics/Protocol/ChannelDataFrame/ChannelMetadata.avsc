@@ -1,0 +1,12 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Protocol.ChannelDataFrame",	
+	"name": "ChannelMetadata",
+	"messageType": "3",
+	"protocol": "2",
+	"fields":
+	[
+		{ "name": "indexes", "type": { "type": "array", "items": "Energistics.Datatypes.ChannelData.IndexMetadataRecord" } },
+		{ "name": "channels", "type": { "type": "array", "items": "Energistics.Datatypes.ChannelData.ChannelMetadataRecord" } }
+	]
+}

@@ -1,0 +1,10 @@
+{
+	"type": "record",
+	"namespace": "Energistics.Datatypes.ChannelDataFrame",	
+	"name": "DataRow",
+	"fields":
+	[
+		{ "name": "index", "type": { "type": "array", "items": "Energistics.Datatypes.ChannelData.IndexValue" } },
+		{ "name": "data", "type": { "type": "array", "items": "Energistics.Datatypes.DataValue" } }
+	]
+}
