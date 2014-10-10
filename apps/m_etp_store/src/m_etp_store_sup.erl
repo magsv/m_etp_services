@@ -22,6 +22,17 @@ start_link() ->
 %% Supervisor callbacks
 %% ===================================================================
 
+get_m_etp_session_pool()->
+	{ok, SessionCnfgArgs} = application:get_env(m_etp_store, m_etp_session_pool_config),
+	[{pool_cnfg,SessionCnfg},
+	 {worker_args,[WorkerArgs]}]=SessionCnfgArgs,
+	PoolArgs=[{name, {local, m_etp_store_proxy_pool}},
+			  {worker_module, m_etp_session_store_server}]++SessionCnfg,
+	Result=poolboy:child_spec(m_etp_store_proxy_pool, PoolArgs, WorkerArgs),
+	Result.
+
+
 init([]) ->
-    {ok, { {one_for_one, 5, 10}, []} }.
+	Processes=[get_m_etp_session_pool()],
+    {ok, { {one_for_one, 5, 10}, Processes} }.
 

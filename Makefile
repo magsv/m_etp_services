@@ -30,13 +30,13 @@ docs:
 	@erl -noshell -run edoc_run application '$(APP)' '"."' '[]'
 
 erlconnect:
-	@erl -sname remotetest -remsh 'magnus@magnus-desktop'
+	@erl -sname remotetest -remsh 'm_etp@magnus-desktop'
 
 
 
 
 m_etp_server: app
-	exec erl -pa $(PWD)/apps/*/ebin -pa $(DEPS_DIR)/*/ebin -boot start_sasl  -s crypto -s lager  -s m_etp_server -s m_etp_store -s m_etp_avro -sname m_etp 
+	exec erl -pa $(PWD)/apps/*/ebin -pa $(DEPS_DIR)/*/ebin -boot start_sasl  -config $(PWD)/apps/m_etp_store/priv/app.config -s crypto -s lager  -s m_etp_server -s m_etp_store -s m_etp_avro -sname m_etp 
 
 
 
