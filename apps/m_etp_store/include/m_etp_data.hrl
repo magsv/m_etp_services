@@ -8,13 +8,30 @@
 
 
 -record(m_etp_protocols,{
-		protocol,
+	    name=erlang:error({required, name}),
+		protocol_no,
 		name_space,
-		name,
 		message_type,
 		raw_schema,
 		compiled_schema,
 		created,
-		version,
+		v_major,
+		v_minor,
+		revision,
+		patch,
+		role,
 		valid
 	}).
+
+-record(m_etp_valid_protocol,{
+		name=erlang:error({required, name}),
+		v_major,
+		v_minor,
+		revision,
+		patch,
+		role,
+		protocol_spec
+
+
+	}).
+

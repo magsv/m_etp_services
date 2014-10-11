@@ -5,6 +5,7 @@
 -export([terminate/3]).
 
 init(_Type, Req, []) ->
+	
 	{ok, Req, undefined}.
 
 handle(Req, State) ->

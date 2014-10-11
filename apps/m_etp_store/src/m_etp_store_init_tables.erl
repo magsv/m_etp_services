@@ -1,7 +1,7 @@
 -module (m_etp_store_init_tables).
 
 
--include_lib("include/m_etp_data.hrl").
+-include_lib("../m_etp_store/include/m_etp_data.hrl").
 -export([create_tables/1,create_schema/1]).
 
 create_tables(Nodes)->
@@ -10,9 +10,12 @@ create_tables(Nodes)->
 							  {record_name, m_etp_session},
 							  {attributes,record_info(fields,m_etp_session)}]),
 	ResultSchema=mnesia:create_table(m_etp_protocols,[{disc_copies, Nodes }, 
-							  {record_name, m_etp_protocols},
+							  {record_name, m_etp_protocols},{type, bag},
 							  {attributes,record_info(fields,m_etp_protocols)}]),
-	{[ResultSession,ResultSchema]}. 
+	ResultProtocolVersions=mnesia:create_table(m_etp_valid_protocols,[{disc_copies, Nodes }, 
+							  {record_name, m_etp_valid_protocol},{type, bag},
+							  {attributes,record_info(fields,m_etp_valid_protocol)}]),
+	{[ResultSession,ResultSchema,ResultProtocolVersions]}. 
 
 create_schema(Nodes)->
 	mnesia:create_schema(Nodes).

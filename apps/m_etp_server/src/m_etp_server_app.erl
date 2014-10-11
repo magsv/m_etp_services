@@ -14,7 +14,8 @@ start(_StartType, _StartArgs) ->
 	Dispatch = cowboy_router:compile([
 		{'_', [
 			{"/ping", m_etp_ping_handler, []},
-			{"/m_etp_socket_ping",m_etp_socket_handler,[]}
+			{"/m_etp_socket_ping",m_etp_socket_ping_handler,[]},
+			{"/m_etp_socket_service",m_etp_socket_handler,[]}
 		]}
 	]),
 	{ok, _} = cowboy:start_http(http, 100, [{port, 8080}], [

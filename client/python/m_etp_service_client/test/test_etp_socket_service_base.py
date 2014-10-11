@@ -3,6 +3,7 @@ import m_etp_service_client.client.service_connections as sConn
 import logging
 import sys
 import m_etp_service_client.test.testUtils as tUtils
+
 class Test(unittest.TestCase):
 
 
@@ -14,23 +15,23 @@ class Test(unittest.TestCase):
         pass
 
 
-    def testPingETPSocketService(self):
-        ws=sConn.connect_ping_socket(tUtils.get_servername())
-        logging.debug("Connected sending data")
-        result=sConn.socket_send_and_recieve(ws,"PING")
-        logging.info("Recieved message:"+result)
-        ws.close()
-        pass
+    def testEstablishConnection(self):
+    	try:
+    		logging.debug("Testing establishin connection")
+    		ws=sConn.connect_service_socket(tUtils.get_servername())
+    		ws.close()
+    		pass
+    	except Exception, e:
+    		self.fail("Error:"+str(e))
 
-
-    def testFailPingETPServiceWithWrongProtocol(self):
+    def testFailConnectionWithWrongProtocol(self):
         try:
-            ws=sConn.connect_ping_socket(tUtils.get_servername(),"INVALID_PROTOCOL")
+            ws=sConn.connect_service_socket(tUtils.get_servername(),"INVALID_PROTOCOL")
             ws.close()
             self.fail()
         except Exception, e:
-           
            pass
+        
 
 
 if __name__ == "__main__":

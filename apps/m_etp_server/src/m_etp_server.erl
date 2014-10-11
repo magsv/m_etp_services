@@ -7,6 +7,7 @@ start() ->
     ok =application:start(cowlib),
     ok =application:start(cowboy),
     ok =application:start(gproc),
+    ok =application:start(mnesia),
 	ok = application:start(m_etp_server).
 
 stop(_State) ->
