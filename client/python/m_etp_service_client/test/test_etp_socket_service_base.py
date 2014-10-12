@@ -1,5 +1,5 @@
 import unittest
-import m_etp_service_client.client.service_connections as sConn
+import m_etp_service_client.client.m_service_connections as sConn
 import logging
 import sys
 import m_etp_service_client.test.testUtils as tUtils

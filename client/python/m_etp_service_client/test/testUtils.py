@@ -1,4 +1,4 @@
-import m_etp_service_client.client.avro_utils as aUtils
+import m_etp_service_client.client.m_avro_utils as aUtils
 
 schemaFolder="/media/magnus/hdd_1/projects/erlang/energistics/m_etp_services/etp_schemas/m_etp_schemas_optimized/"
 

@@ -1,9 +1,9 @@
 import unittest
 import logging
 import sys
-import m_etp_service_client.client.service_connections as sConn
+import m_etp_service_client.client.m_service_connections as sConn
 import m_etp_service_client.test.testUtils as tUtils
-import m_etp_service_client.client.file_utils as fUtils
+import m_etp_service_client.client.m_file_utils as fUtils
 
 class Test(unittest.TestCase):
 

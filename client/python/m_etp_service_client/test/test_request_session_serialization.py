@@ -2,7 +2,7 @@ import unittest
 import logging
 import sys
 import m_etp_service_client.test.testUtils as tUtils
-import m_etp_service_client.client.avro_utils as aUtils
+import m_etp_service_client.client.m_avro_utils as aUtils
 
 class Test(unittest.TestCase):
     
