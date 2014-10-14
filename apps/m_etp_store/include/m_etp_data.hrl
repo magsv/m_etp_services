@@ -7,11 +7,11 @@
 	}).
 
 
--record(m_etp_protocols,{
+-record(m_etp_protocol,{
 	    name=erlang:error({required, name}),
-		protocol_no,
-		name_space,
-		message_type,
+		protocol_no=erlang:error({required, protocol_no}),
+		message_type=erlang:error({required, message_type}),
+		name_space=erlang:error({required, name_space}),
 		raw_schema,
 		compiled_schema,
 		created,

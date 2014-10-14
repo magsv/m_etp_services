@@ -49,7 +49,8 @@ delete_resource(Req, State) ->
 process_post_body(true,<<"POST">>,Req,State)->
     case cowboy_req:body_qs(Req) of
 		{ok,[{Data,Status}],Req3}->
-			RecordData=m_etp_codec_utils:decode_json_protocol2record(Data);
+			RecordData=m_etp_codec_utils:decode_json_protocol2record(Data),
+			process_result(m_etp_protocol_proxy:create_protocol(RecordData),Req,State);
 		{error,Reason,Req3}->
 			lager:info("Error post"),
 			handle_result({error,Reason},Req,State,500)
@@ -74,5 +75,11 @@ handle_result(Body,Req,State,HTTPCode)->
 			respond_with_body_and_code(Term,Req,State,HTTPCode)
 	end.
 
-terminate(_Reason, Req, State) ->
+terminate(_Reason, _Req, _State) ->
     ok.
+
+process_result({ok,Data},Req,State)->
+	handle_result({ok,Data},Req,State,200);
+
+process_result({error,Reason},Req,State)->
+	handle_result({error,Reason},Req,State,500).
