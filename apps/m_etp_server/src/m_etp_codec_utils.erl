@@ -10,6 +10,7 @@ decode_json_protocol2record(Data)->
 		MessageType=ej:get({"messageType"},Decoded),
 		ProtocolNo=ej:get({"protocol"},Decoded),
 		NameSpace=ej:get({"namespace"},Decoded),
+		CompiledSchema=eavro:parse_schema(Data),
 		ETPProtocolRecord=#m_etp_protocol{
 			name=Name,
 			protocol_no=ProtocolNo,
@@ -22,10 +23,11 @@ decode_json_protocol2record(Data)->
 			revision="",
 			patch="",
 			role="",
-			valid=true
+			valid=true,
+			compiled_schema=CompiledSchema
 		},
-		ETPProtocolRecord
-    catch exit:Why ->
+		{ok,ETPProtocolRecord}
+    catch _:Why ->
     	lager:error("Failed in decode of json:~p",[Why]),
 		{error,failed_in_decode_json}
     end.
