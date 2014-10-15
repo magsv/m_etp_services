@@ -19,6 +19,7 @@ def get_protocol(serverName,protocolName):
 		protocolServiceBase=serverName+"/m_etp_protocol_service"+"/"+protocolName
 		logging.debug("Getting data from:"+protocolServiceBase)
 		
-		rUtils.get_json_data_from_service(protocolServiceBase)
+		result=rUtils.get_json_data_from_service(protocolServiceBase)
+		return result
 	except Exception, e:
-		raise e
+		raise Exception("Failed in get protocol:"+str(e))

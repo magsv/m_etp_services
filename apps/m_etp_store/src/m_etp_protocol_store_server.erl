@@ -52,6 +52,7 @@ code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
 
 process_get(ProtocolName)->
+    lager:info("Checking for protocol with name:~p",[ProtocolName]),
 	Result=mnesia:dirty_read(m_etp_protocol,ProtocolName),
 	handle_mnesia_result(Result).
 
