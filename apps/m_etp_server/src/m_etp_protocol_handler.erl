@@ -52,7 +52,7 @@ handle_request_response(Req,State,<<"GET">>,Mode)->
 		{undefined, Req2} ->
 			respond_with_body_and_code(<<"Missing protocol name">>,Req,State,500);
 		{Code, Req2} ->
-			QueryResult=m_etp_protocol_proxy:get_protocol(binary_to_list(Code)),
+			QueryResult=m_etp_protocol_proxy:get_protocol(Code),
   			process_get_response(QueryResult,Mode,Req,State)
 		    
     end.
@@ -64,6 +64,21 @@ process_post_body(true,<<"POST">>,Req,State)->
 			case RecordData of 
 				{ok,ProtocolRecord}->
 					process_result(m_etp_protocol_proxy:create_protocol(ProtocolRecord),Req3,State);
+				{error,Reason}->
+					handle_result({error,Reason},Req3,State,500)
+			end;
+		{error,Reason,Req3}->
+			lager:info("Error post"),
+			handle_result({error,Reason},Req,State,500)
+	end;
+
+process_post_body(true,<<"PUT">>,Req,State)->
+    case cowboy_req:body_qs(Req) of
+		{ok,[{Data,_}],Req3}->
+			RecordData=m_etp_codec_utils:decode_json_protocol2record(Data),
+			case RecordData of 
+				{ok,ProtocolRecord}->
+					process_result(m_etp_protocol_proxy:update_protocol(ProtocolRecord),Req3,State);
 				{error,Reason}->
 					handle_result({error,Reason},Req3,State,500)
 			end;
@@ -97,8 +112,12 @@ terminate(_Reason, _Req, _State) ->
 process_get_response({error,Reason},Mode,Req,State)->
 	handle_result({error,Reason},Req,State,500);
 
-process_get_response({ok,Data},Mode,Req,State)->
-	handle_result(Data#m_etp_protocol.raw_schema,Req,State,200).
+process_get_response({ok,Data},Mode,Req,State) when is_atom(Data)->
+	handle_result({ok,atom_to_binary(Data,unicode) },Req,State,404);
+
+
+process_get_response({ok,Data},Mode,Req,State) when is_atom(Data)==false->
+	handle_result({ok,Data#m_etp_protocol.raw_schema},Req,State,200).
 
 process_result({ok,Data},Req,State)->
 	handle_result({ok,<<"ok">>},Req,State,201);

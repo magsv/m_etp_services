@@ -26,6 +26,18 @@ class Test(unittest.TestCase):
         except Exception, e:
         	self.fail("Failed in getting schema:"+str(e))
 
+    def testGetInValidSchema(self):
+        try:
+            schemaName="NOT_EXISTING"
+            result=mEtp.get_protocol("http://"+tUtils.get_servername(),schemaName)
+            if result==None:
+
+                pass
+            else:
+                self.fail("Failed in getting schema:")
+        except Exception, e:
+            self.fail("Failed in getting schema:"+str(e))
+
 
 if __name__ == "__main__":
     logging.basicConfig( stream=sys.stderr,level=logging.DEBUG )
