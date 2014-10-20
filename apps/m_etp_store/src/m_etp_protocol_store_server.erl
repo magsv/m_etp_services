@@ -25,7 +25,8 @@ handle_call({create,ProtocolRecord},_From,State)->
 	process_create(process_get(ProtocolRecord#m_etp_protocol.name),ProtocolRecord,State);
 
 handle_call({update,ProtocolRecord},_From,State)->
-	{reply,ok,State};
+	process_update(process_get(ProtocolRecord#m_etp_protocol.name),ProtocolRecord,State);
+	
 
 handle_call({delete,ProtocolName},_From,State)->
 	{reply,ok,State};
@@ -56,12 +57,24 @@ process_get(ProtocolName)->
 	Result=mnesia:dirty_read(m_etp_protocol,ProtocolName),
 	handle_mnesia_result(Result).
 
-process_create({ok,no_data_found},ProtocolRecord,State)->
+process_update({ok,no_data_found},ProtocolRecord,State)->
+	{reply,{error,m_etp_protocol_not_exists},State};
+
+process_update({ok,Data},ProtocolRecord,State)->
+	UpdatedRecord=ProtocolRecord#m_etp_protocol{created=Data#m_etp_protocol.created,updated=m_etp_utils:get_utc_timestamp()},
 	F = fun() ->
-		mnesia:write(m_etp_protocol,ProtocolRecord,write)
+		mnesia:write(m_etp_protocol,UpdatedRecord,write)
 	end,
 	Result=mnesia:activity(transaction, F),
-	{reply,handle_mnesia_result(Result,ProtocolRecord),State};
+	{reply,handle_mnesia_result(Result,UpdatedRecord),State};
+
+process_create({ok,no_data_found},ProtocolRecord,State)->
+	NewRecord=ProtocolRecord#m_etp_protocol{created=m_etp_utils:get_utc_timestamp()},
+	F = fun() ->
+		mnesia:write(m_etp_protocol,NewRecord,write)
+	end,
+	Result=mnesia:activity(transaction, F),
+	{reply,handle_mnesia_result(Result,NewRecord),State};
 	
 
 process_create({ok,Data},ProtocolRecord,State) when is_atom(Data)==false->

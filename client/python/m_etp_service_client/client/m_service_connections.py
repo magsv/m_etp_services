@@ -11,6 +11,11 @@ def connect_service_socket(host):
 	return create_connection("ws://"+host+"/m_etp_socket_service",
 		header=["Sec-Websocket-Protocol: energistics-tp"])
 
+def connect_service_socket_node(host):
+	logging.debug("Conneting to host:"+host)
+	return create_connection("ws://"+host,
+		header=["Sec-Websocket-Protocol: energistics-tp"])
+
 def socket_send_and_recieve(ws,data):
 	ws.send(data)
 	return ws.recv()

@@ -1,5 +1,7 @@
 -module (m_etp_protocol_fsm).
 
+-record(state,{sessionid}).
 
-init([]) ->
-  {ok, unauthorized, nobody}.
+init(SessionId) ->
+
+  {ok, disconnected, #state{sessionid=SessionId}}.

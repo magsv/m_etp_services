@@ -15,6 +15,7 @@
 		raw_schema,
 		compiled_schema,
 		created,
+		updated,
 		v_major,
 		v_minor,
 		revision,

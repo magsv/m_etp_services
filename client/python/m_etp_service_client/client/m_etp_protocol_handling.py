@@ -13,6 +13,15 @@ def store_protocol(serverName,protocolFile):
 	except Exception, e:
 		raise e
 
+def update_protocol(serverName,protocolFile):
+	try:
+		protocolServiceBase=serverName+"/m_etp_protocol_service"
+		logging.debug("Sending data to:"+protocolServiceBase)
+		data=fUtils.readFileToString(protocolFile)
+		rUtils.put_json_data_to_service(protocolServiceBase,data)
+	except Exception, e:
+		raise e
+
 
 def get_protocol(serverName,protocolName):
 	try:

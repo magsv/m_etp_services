@@ -20,7 +20,10 @@ to_hex([H|T]) ->
 to_digit(N) when N < 10 -> $0 + N;
 to_digit(N) -> $a + N-10.
 
-
+get_value_from_key(List, Key) ->
+  %filter the list and select the first tuple by destructuring
+  [{ MatchKey, MatchVal} | _ ] = lists:filter(fun({K, V}) -> K == Key end, List),
+  MatchVal.
 
 get_time_and_date_list()-> 
 	
@@ -31,7 +34,7 @@ get_time_and_date_list()->
 
 get_utc_timestamp()->
 	CurrentTimeList=get_time_and_date_list(),
-	general_list_utils:get_value_from_key(CurrentTimeList, current_utc_time).
+	get_value_from_key(CurrentTimeList, current_utc_time).
 
 get_timestamp() ->
 {Mega,Sec,Micro} = erlang:now(),
