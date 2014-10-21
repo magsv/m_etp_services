@@ -66,7 +66,7 @@ process_update({ok,Data},ProtocolRecord,State)->
 		mnesia:write(m_etp_protocol,UpdatedRecord,write)
 	end,
 	Result=mnesia:activity(transaction, F),
-	{reply,handle_mnesia_result(Result,UpdatedRecord),State};
+	{reply,handle_mnesia_result(Result,UpdatedRecord),State}.
 
 process_create({ok,no_data_found},ProtocolRecord,State)->
 	NewRecord=ProtocolRecord#m_etp_protocol{created=m_etp_utils:get_utc_timestamp()},
