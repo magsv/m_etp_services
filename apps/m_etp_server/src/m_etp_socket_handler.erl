@@ -38,7 +38,7 @@ websocket_handle({text, Msg}, Req, State) ->
 	{reply, {text, << "That's what she said! ", Msg/binary >>}, Req, State};
 
 websocket_handle({binary,Data},Req,State)->
-	lager:info("Handling binary data,state:~p",[State]),
+	lager:info("Handling binary data,state:~p,~p",[Data,State]),
 	{ok, Req, State};
 	
 

@@ -32,3 +32,11 @@ def get_protocol(serverName,protocolName):
 		return result
 	except Exception, e:
 		raise Exception("Failed in get protocol:"+str(e))
+
+def delete_protocol(serverName,protocolName):
+	try:
+		protocolServiceBase=serverName+"/m_etp_protocol_service"+"/"+protocolName
+		logging.debug("Getting data from:"+protocolServiceBase)
+		rUtils.delete_json_resource(protocolServiceBase)
+	except Exception, e:
+		raise Exception("Failed in delete protocol:"+str(e))

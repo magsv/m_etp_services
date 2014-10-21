@@ -42,8 +42,13 @@ handle_request_json(Req,State)->
    
 
 delete_resource(Req, State) ->  
-    %handle_delete_request(Req,State,"USER").
-    ok.
+    case cowboy_req:binding(code, Req) of
+		{undefined, Req2} ->
+			respond_with_body_and_code(<<"Missing protocol name">>,Req,State,500);
+		{Code, Req2} ->
+  			process_delete_resource(Code,Req2,State)
+		    
+    end.
 
 
 handle_request_response(Req,State,<<"GET">>,Mode)->
@@ -56,6 +61,15 @@ handle_request_response(Req,State,<<"GET">>,Mode)->
   			process_get_response(QueryResult,Mode,Req,State)
 		    
     end.
+
+process_delete_resource(Code,Req,State)->
+	process_delete_response(m_etp_protocol_proxy:delete_protocol(Code),Req,State).
+
+process_delete_response({ok,_},Req,State)->
+	handle_result({ok,<<"DELETED">>},Req,State,200);
+
+process_delete_response({error,Reason},Req,State)->
+	handle_result({error,Reason},Req,State,500).
 
 process_post_body(true,<<"POST">>,Req,State)->
     case cowboy_req:body_qs(Req) of
@@ -71,6 +85,8 @@ process_post_body(true,<<"POST">>,Req,State)->
 			lager:info("Error post"),
 			handle_result({error,Reason},Req,State,500)
 	end;
+
+
 
 process_post_body(true,<<"PUT">>,Req,State)->
     case cowboy_req:body_qs(Req) of

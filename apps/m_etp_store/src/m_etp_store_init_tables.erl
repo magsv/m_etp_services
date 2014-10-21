@@ -10,10 +10,10 @@ create_tables(Nodes)->
 							  {record_name, m_etp_session},
 							  {attributes,record_info(fields,m_etp_session)}]),
 	ResultSchema=mnesia:create_table(m_etp_protocol,[{disc_copies, Nodes }, 
-							  {record_name, m_etp_protocol},{type, bag},
+							  {record_name, m_etp_protocol},
 							  {attributes,record_info(fields,m_etp_protocol)}]),
 	ResultProtocolVersions=mnesia:create_table(m_etp_valid_protocols,[{disc_copies, Nodes }, 
-							  {record_name, m_etp_valid_protocol},{type, bag},
+							  {record_name, m_etp_valid_protocol},
 							  {attributes,record_info(fields,m_etp_valid_protocol)}]),
 	{[ResultSession,ResultSchema,ResultProtocolVersions]}. 
 

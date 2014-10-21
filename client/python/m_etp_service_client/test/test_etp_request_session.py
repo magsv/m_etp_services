@@ -22,9 +22,6 @@ class Test(unittest.TestCase):
             tUtils.serializeRequestSessionToFile()
             dataToSend=fUtils.readFileToString(tUtils.get_test_storage()+"/"+tUtils.getRequestSessionAvroFileName())
             ws=sConn.connect_service_socket(tUtils.get_servername())
-            #ws=sConn.connect_service_socket("localhost:8081")
-            #result =  ws.recv()
-            #print "Received '%s'" % result
             ws.send_binary(dataToSend)
             ws.close()
             pass

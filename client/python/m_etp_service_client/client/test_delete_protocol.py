@@ -14,15 +14,15 @@ class Test(unittest.TestCase):
         pass
 
 
-    def testUpdateProtocol(self):
+    def testDeleteProtocol(self):
         try:
-        	requestSessionSchema=tUtils.get_requestsession_protocol()
-        	logging.debug("Reading request session schema from:"+requestSessionSchema)
-        	mEtp.update_protocol("http://"+tUtils.get_servername(),requestSessionSchema)
-        	#mEtp.get_protocol("http://"+tUtils.get_servername(),"TEST")
+        	schemaName="RequestSession"
+        	
+        	mEtp.delete_protocol("http://"+tUtils.get_servername(),schemaName) 
+        	logging.debug("Deleted schema...")      	
         	pass
         except Exception, e:
-        	self.fail("Failed in update protocol:"+str(e))
+        	self.fail("Failed in delete schema:"+str(e))
 
 
 if __name__ == "__main__":
