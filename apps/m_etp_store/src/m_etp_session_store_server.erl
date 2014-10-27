@@ -15,7 +15,7 @@ start_link(Args) ->
 init({}) ->
 	{ok, undefined}.
 
-handle_call({create_session},From,State)->
+handle_call({create_session,SessionId},From,State)->
 	ok;
 
 handle_call({get_session,Token},From,State)->

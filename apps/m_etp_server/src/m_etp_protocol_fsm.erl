@@ -5,19 +5,31 @@
 
 -record(state,{sessionid}).
 
+start_link(SessionId)->
+    gen_fsm:start_link(?MODULE,SessionId,[]).
+
 init(SessionId) ->
+    lager:info("Starting gen fsm...."),
 	{ok, disconnected, #state{sessionid=SessionId}}.
 
 
+disconnected({connected,SessionId},State)->
+    lager:info("Session id:~p is connected",[State#state.sessionid]),
+    {next_state,connected,State}.
 
+connected(Event,State)->
+    lager:info("FMS connected,~p",[State#state.sessionid]),
+    {next_state,connected,State}.
 
+hibernating(Event,State)->
+    {next_state,hibernating,State}.
 
 state_name(Event, StateData) ->
     {next_state, state_name, StateData}.
 
 
 
-state_name(Event, From, StateData) ->
+state_name(Event, _From, StateData) ->
     Reply = ok,
     {reply, Reply, state_name, StateData}.
 
@@ -28,7 +40,7 @@ handle_event(Event, StateName, StateData) ->
 
 
 
-handle_sync_event(Event, From, StateName, StateData) ->
+handle_sync_event(Event, _From, StateName, StateData) ->
     Reply = ok,
     {reply, Reply, StateName, StateData}.
 
