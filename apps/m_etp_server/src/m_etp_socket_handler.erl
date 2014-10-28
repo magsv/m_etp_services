@@ -38,7 +38,7 @@ websocket_handle({text, Msg}, Req, State) ->
 	{reply, {text, << "That's what she said! ", Msg/binary >>}, Req, State};
 
 websocket_handle({binary,Data},Req,State)->
-	lager:info("Handling binary data,state:~p,~p",[Data,State]),
+	%lager:info("Handling binary data,state:~p,~p",[Data,State]),
 	{ok, Req, State};
 	
 
@@ -49,7 +49,10 @@ websocket_handle(Data, Req, State) ->
 	{ok, Req, State}.
 
 websocket_info(post_init, Req, State) ->
-    NewState=State#state{handshake_done=true,session_id=m_etp_utils:get_session_token()},
+    SessionId=list_to_atom(m_etp_utils:get_session_token()),
+    NewState=State#state{handshake_done=true,session_id=SessionId},
+    lager:info("Websocket accepted with new sessionId:~p",[SessionId]),
+    m_etp_protocol_fsm_sup:attach_session(SessionId),
     {ok, Req, NewState};
 
 websocket_info({timeout, _Ref, Msg}, Req, State) ->
