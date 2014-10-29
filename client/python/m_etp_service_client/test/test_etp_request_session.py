@@ -23,7 +23,7 @@ class Test(unittest.TestCase):
             dataToSend=fUtils.readFileToString(tUtils.get_test_storage()+"/"+tUtils.getRequestSessionAvroFileName())
             ws=sConn.connect_service_socket(tUtils.get_servername())
             ws.send_binary(dataToSend)
-            ws.close()
+            #ws.close()
             pass
         except Exception, e:
     		self.fail("Error:"+str(e))

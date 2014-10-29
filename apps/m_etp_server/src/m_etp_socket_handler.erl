@@ -38,7 +38,8 @@ websocket_handle({text, Msg}, Req, State) ->
 	{reply, {text, << "That's what she said! ", Msg/binary >>}, Req, State};
 
 websocket_handle({binary,Data},Req,State)->
-	%lager:info("Handling binary data,state:~p,~p",[Data,State]),
+	%lager:info("Handling binary data,state:~p",[Data]),
+    %lager:info("Binary list data:~p",[binary_to_list(Data) ]),
 	{ok, Req, State};
 	
 
@@ -53,7 +54,12 @@ websocket_info(post_init, Req, State) ->
     NewState=State#state{handshake_done=true,session_id=SessionId},
     lager:info("Websocket accepted with new sessionId:~p",[SessionId]),
     m_etp_protocol_fsm_sup:attach_session(SessionId),
+    gproc:reg({p, l, {pubsub,wsbroadcast}}),
     {ok, Req, NewState};
+
+websocket_info({_PID,{pubsub,wsbroadcast},Msg},Req,State)->
+    lager:info("Got message broadcast:~p,",[Msg]),
+    {ok,Req,State};
 
 websocket_info({timeout, _Ref, Msg}, Req, State) ->
 	{reply, {text, Msg}, Req, State};

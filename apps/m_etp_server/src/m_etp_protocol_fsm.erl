@@ -2,7 +2,7 @@
 -behaviour(gen_fsm).
 
 -export([init/1, state_name/2, state_name/3, handle_event/3, handle_sync_event/4, handle_info/3, terminate/3, code_change/4]).
--export([start_link/1,disconnected/2,connected/2,hibernating/2]).
+-export([start_link/1,disconnected/2,connected/2,hibernating/2,in_session/2]).
 -record(state,{sessionid}).
 
 start_link(SessionId)->
@@ -20,10 +20,14 @@ disconnected({connected},State)->
 
 connected(Event,State)->
     lager:info("FMS connected,~p",[State#state.sessionid]),
-    {next_state,connected,State}.
+    {next_state,connected,State};
 
 connected({request_session},State)->
     {next_state,connected,State}.
+
+in_session(Event,State)->
+    {next_stat,in_session,State}.
+
 
 hibernating(Event,State)->
     {next_state,hibernating,State}.
