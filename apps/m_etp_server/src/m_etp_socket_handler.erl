@@ -11,6 +11,7 @@
 	request_session_recieved=false,sent_open
 	=false,session_id}).
 
+
 init({tcp, http}, _Req, _Opts) ->
 	{upgrade, protocol, cowboy_websocket}.
 
@@ -54,10 +55,11 @@ websocket_info(post_init, Req, State) ->
     NewState=State#state{handshake_done=true,session_id=SessionId},
     lager:info("Websocket accepted with new sessionId:~p",[SessionId]),
     m_etp_protocol_fsm_sup:attach_session(SessionId),
-    gproc:reg({p, l, {pubsub,wsbroadcast}}),
+    gproc:reg({p, l, {socket_sesion,SessionId}}),
+
     {ok, Req, NewState};
 
-websocket_info({_PID,{pubsub,wsbroadcast},Msg},Req,State)->
+websocket_info({_PID,{socket_sesion,SessionId},Msg},Req,State)->
     lager:info("Got message broadcast:~p,",[Msg]),
     {ok,Req,State};
 
@@ -67,4 +69,5 @@ websocket_info(_Info, Req, State) ->
 	{ok, Req, State}.
 
 websocket_terminate(_Reason, _Req, _State) ->
+    lager:info("Socket terminated"),
 	ok.

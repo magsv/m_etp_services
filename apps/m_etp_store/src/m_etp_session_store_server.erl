@@ -22,13 +22,13 @@ handle_call({create_session,SessionId},_From,State)->
 	process_create(process_get(SessionId),SessionId,State);
 
 handle_call({get_session,SessionId},_From,State)->
-	ok;
+	{reply,process_get(SessionId),State};
 
 handle_call({update_session,SessionId,SessionData},_From,State)->
 	ok;
 
-handle_call({destroy_session},_From,State)->
-	ok;
+handle_call({destroy_session,SessionId},_From,State)->
+	process_delete(SessionId,State);
 
 %% @private
 handle_call(_Request, _From, State) ->
@@ -49,6 +49,15 @@ terminate(_Reason, _State) ->
 %% @private
 code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
+
+process_delete(SessionId,State)->
+	F = fun() ->
+            
+			 mnesia:delete({m_etp_sessions,SessionId})
+  	end,
+  	Result=mnesia:transaction(F),
+    {reply,handle_mnesia_result(Result,delete_mobject),State}.
+
 
 process_create({ok,no_data_found},SessionId,State)->
 	NewRecord=#m_etp_session{session_id=SessionId,created=m_etp_utils:get_utc_timestamp()},
@@ -79,4 +88,11 @@ handle_mnesia_result(ok,Record)->
  
 handle_mnesia_result({error,Reason},Record)->
 	 lager:error("Failed in creating sessionobject:~p",[Reason]),
-	 {error,failed_in_create_session_object}.
+	 {error,failed_in_create_session_object};
+
+handle_mnesia_result({atomic,ok},delete_session)->
+	{ok,m_etp_session_deleted};
+
+ handle_mnesia_result({aborted,Reason},delete_session)->
+ 	lager:error("Failed in delete of m_etp_protocol:~p",[Reason]),
+	{error,failed_in_delete_m_etp_protocol}.
