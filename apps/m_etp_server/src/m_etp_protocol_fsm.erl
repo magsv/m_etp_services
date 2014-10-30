@@ -16,11 +16,14 @@ init(SessionId) ->
 
 disconnected({connected},State)->
     lager:info("Session id:~p is connected",[State#state.sessionid]),
+    lager:info("Intializing session state data"),
     {next_state,connected,State}.
 
-connected(Event,State)->
-    lager:info("FMS connected,~p",[State#state.sessionid]),
-    {next_state,connected,State};
+%connected(Event,State)->
+ %   lager:info("FSM connected,~p",[State#state.sessionid]),
+ %   {next_state,connected,State};
+
+
 
 connected({request_session},State)->
     {next_state,connected,State}.

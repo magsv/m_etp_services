@@ -11,6 +11,7 @@
 	request_session_recieved=false,sent_open
 	=false,session_id}).
 
+-define(WSKey,{pubsub,wsbroadcast}).
 
 init({tcp, http}, _Req, _Opts) ->
 	{upgrade, protocol, cowboy_websocket}.
@@ -25,6 +26,7 @@ websocket_init(_TransportName, Req, _Opts) ->
                 true ->
                     Req3 = cowboy_req:set_resp_header(<<"sec-websocket-protocol">>,
                         <<"energistics-tp">>, Req2),
+
                     self() ! post_init,
                     {ok, Req3, #state{}};
                 false ->
@@ -55,13 +57,19 @@ websocket_info(post_init, Req, State) ->
     NewState=State#state{handshake_done=true,session_id=SessionId},
     lager:info("Websocket accepted with new sessionId:~p",[SessionId]),
     m_etp_protocol_fsm_sup:attach_session(SessionId),
-    gproc:reg({p, l, {socket_sesion,SessionId}}),
+    gproc:reg({p, l, {socket_session,SessionId}}),
+    gen_fsm:send_event(SessionId,{connected}),
 
     {ok, Req, NewState};
 
-websocket_info({_PID,{socket_sesion,SessionId},Msg},Req,State)->
-    lager:info("Got message broadcast:~p,",[Msg]),
+websocket_info({_PID,{socket_session,SessionId},{ok,Msg}},Req,State)->
+    lager:info("Got ok message broadcast:~p,",[Msg]),
     {ok,Req,State};
+
+websocket_info({_PID,{socket_session,SessionId},{error,Msg}},Req,State)->
+    lager:info("Got message broadcast error:~p,",[Msg]),
+    {ok,Req,State};
+
 
 websocket_info({timeout, _Ref, Msg}, Req, State) ->
 	{reply, {text, Msg}, Req, State};

@@ -22,5 +22,4 @@ update_session(SessionId,SessionData)->
 	poolboy:transaction(m_etp_store_proxy_pool, fun(Worker) ->
         					gen_server:call(Worker,{update_session,SessionId,SessionData})
   	end).
-
 	
