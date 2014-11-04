@@ -62,8 +62,8 @@ websocket_info(post_init, Req, State) ->
 
     {ok, Req, NewState};
 
-websocket_info({_PID,{socket_session,SessionId},{ok,Msg}},Req,State)->
-    lager:info("Got ok message broadcast:~p,",[Msg]),
+websocket_info({_PID,{socket_session,SessionId},{ok,{m_etp_session,StoredSession,_,_,_,_}}},Req,State)->
+    lager:info("Got ok session created and stored:~p,",[StoredSession]),
     {ok,Req,State};
 
 websocket_info({_PID,{socket_session,SessionId},{error,Msg}},Req,State)->
@@ -73,7 +73,9 @@ websocket_info({_PID,{socket_session,SessionId},{error,Msg}},Req,State)->
 
 websocket_info({timeout, _Ref, Msg}, Req, State) ->
 	{reply, {text, Msg}, Req, State};
-websocket_info(_Info, Req, State) ->
+
+websocket_info(Info, Req, State) ->
+    lager:info("Got unknow req msg:~p",[Info]),
 	{ok, Req, State}.
 
 websocket_terminate(_Reason, _Req, _State) ->

@@ -1,7 +1,7 @@
 ERL ?= erl
-DEPS_DIR:=/media/magnus/hdd_1/projects/erlang/deps
-MNESIA_DIR:=/media/magnus/hdd_1/projects/erlang/energistics/m_etp_services/mnesia_dir
-APP_CNFG:=/media/magnus/hdd_1/projects/erlang/energistics/m_etp_services/apps/m_etp_store/priv/app.config
+DEPS_DIR:=$(PWD)/deps
+MNESIA_DIR:=$(PWD)/mnesia_dir
+APP_CNFG:=/$(PWD)/apps/m_etp_store/priv/app.config
 .PHONY: deps
 
 all: deps

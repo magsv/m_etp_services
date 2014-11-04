@@ -17,6 +17,7 @@ init(SessionId) ->
 disconnected({connected},State)->
     lager:info("Session id:~p is connected",[State#state.sessionid]),
     lager:info("Intializing session state data"),
+    spawn(m_etp_session_process_handler,create_session_and_broadcast,[State#state.sessionid]),
     {next_state,connected,State}.
 
 %connected(Event,State)->
@@ -25,12 +26,15 @@ disconnected({connected},State)->
 
 
 
-connected({request_session},State)->
-    {next_state,connected,State}.
+connected({Data},State)->
+    {next_state,in_session,State}.
 
 in_session(Event,State)->
-    {next_stat,in_session,State}.
+    {next_state,in_session,State};
 
+
+in_session({close_session},State)->
+    {next_state,disconnected,State}.
 
 hibernating(Event,State)->
     {next_state,hibernating,State}.

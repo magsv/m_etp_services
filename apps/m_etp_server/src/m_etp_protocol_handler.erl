@@ -44,7 +44,7 @@ handle_request_json(Req,State)->
 delete_resource(Req, State) ->  
     case cowboy_req:binding(code, Req) of
 		{undefined, Req2} ->
-			respond_with_body_and_code(<<"Missing protocol name">>,Req,State,500);
+			respond_with_body_and_code(<<"Missing protocol name">>,Req2,State,500);
 		{Code, Req2} ->
   			process_delete_resource(Code,Req2,State)
 		    
@@ -55,10 +55,10 @@ handle_request_response(Req,State,<<"GET">>,Mode)->
 	
 	case cowboy_req:binding(code, Req) of
 		{undefined, Req2} ->
-			respond_with_body_and_code(<<"Missing protocol name">>,Req,State,500);
+			respond_with_body_and_code(<<"Missing protocol name">>,Req2,State,500);
 		{Code, Req2} ->
 			QueryResult=m_etp_protocol_proxy:get_protocol(Code),
-  			process_get_response(QueryResult,Mode,Req,State)
+  			process_get_response(QueryResult,Mode,Req2,State)
 		    
     end.
 
@@ -83,7 +83,7 @@ process_post_body(true,<<"POST">>,Req,State)->
 			end;
 		{error,Reason,Req3}->
 			lager:info("Error post"),
-			handle_result({error,Reason},Req,State,500)
+			handle_result({error,Reason},Req3,State,500)
 	end;
 
 
@@ -100,10 +100,10 @@ process_post_body(true,<<"PUT">>,Req,State)->
 			end;
 		{error,Reason,Req3}->
 			lager:info("Error post"),
-			handle_result({error,Reason},Req,State,500)
+			handle_result({error,Reason},Req3,State,500)
 	end;
 
-process_post_body(false,Method,Req,State)->
+process_post_body(false,_Method,Req,State)->
 	lager:info("Processing body no body data found.."),
 	respond_with_body_and_code(<<"Missing body">>,Req,State,500).
 
@@ -125,17 +125,17 @@ handle_result(Body,Req,State,HTTPCode)->
 terminate(_Reason, _Req, _State) ->
     ok.
 
-process_get_response({error,Reason},Mode,Req,State)->
+process_get_response({error,Reason},_Mode,Req,State)->
 	handle_result({error,Reason},Req,State,500);
 
-process_get_response({ok,Data},Mode,Req,State) when is_atom(Data)->
+process_get_response({ok,Data},_Mode,Req,State) when is_atom(Data)->
 	handle_result({ok,atom_to_binary(Data,unicode) },Req,State,404);
 
 
-process_get_response({ok,Data},Mode,Req,State) when is_atom(Data)==false->
+process_get_response({ok,Data},_Mode,Req,State) when is_atom(Data)==false->
 	handle_result({ok,Data#m_etp_protocol.raw_schema},Req,State,200).
 
-process_result({ok,Data},Req,State)->
+process_result({ok,_Data},Req,State)->
 	handle_result({ok,<<"ok">>},Req,State,201);
 
 process_result({error,Reason},Req,State)->

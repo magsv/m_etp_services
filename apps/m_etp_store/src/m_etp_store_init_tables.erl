@@ -6,9 +6,13 @@
 
 create_tables(Nodes)->
 	ensure_started(mnesia),
-	ResultSession=mnesia:create_table(m_etp_sessions,[{disc_copies, Nodes }, 
-							  {record_name, m_etp_session},
-							  {attributes,record_info(fields,m_etp_session)}]),
+	
+	ResultSession=mnesia:create_table(m_etp_sessions,[
+								{disc_copies, Nodes }, 
+							  	{record_name, m_etp_session},
+							  		{attributes,record_info(fields,m_etp_session)}
+							  	]
+							  	),
 	ResultSchema=mnesia:create_table(m_etp_protocol,[{disc_copies, Nodes }, 
 							  {record_name, m_etp_protocol},
 							  {attributes,record_info(fields,m_etp_protocol)}]),

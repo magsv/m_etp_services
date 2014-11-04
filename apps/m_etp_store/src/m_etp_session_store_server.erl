@@ -24,11 +24,16 @@ handle_call({create_session,SessionId},_From,State)->
 handle_call({get_session,SessionId},_From,State)->
 	{reply,process_get(SessionId),State};
 
-handle_call({update_session,SessionId,SessionData},_From,State)->
-	ok;
+handle_call({update_session_status,SessionId,SessionStatus},_From,State)->
+	process_update(process_get(SessionId),{session_status,SessionId,SessionStatus},State);
+
+handle_call({update_session_request,SessionId,SessionRequest},_From,State)->
+	process_update(process_get(SessionId),{session_request,SessionId,SessionRequest},State);
 
 handle_call({destroy_session,SessionId},_From,State)->
 	process_delete(SessionId,State);
+
+
 
 %% @private
 handle_call(_Request, _From, State) ->
@@ -60,15 +65,38 @@ process_delete(SessionId,State)->
 
 
 process_create({ok,no_data_found},SessionId,State)->
-	NewRecord=#m_etp_session{session_id=SessionId,created=m_etp_utils:get_utc_timestamp()},
+	NewRecord=#m_etp_session{session_id=SessionId,created=m_etp_utils:get_utc_timestamp(),status=connected},
 	F = fun() ->
 		mnesia:write(m_etp_sessions,NewRecord,write)
 	end,
 	Result=mnesia:activity(transaction, F),
 	{reply,handle_mnesia_result(Result,NewRecord),State};
 
-process_create({ok,Data},SessionId,State)->
+process_create({ok,Data},_SessionId,State) when is_atom(Data)==false->
 	{reply,{error,m_etp_session_exists},State}.
+
+process_update({ok,no_data_found},{_,_SessionId,_SessionStatus},State)->
+	{reply,{error,m_etp_session_not_exists},State};
+
+
+process_update({ok,Data},{session_status,_SessionId,SessionStatus},State) ->
+	NewRecord=Data#m_etp_session{updated=m_etp_utils:get_utc_timestamp(),status=SessionStatus},
+	F = fun() ->
+		mnesia:write(m_etp_sessions,NewRecord,write)
+	end,
+	Result=mnesia:activity(transaction, F),
+	{reply,handle_mnesia_result(Result,NewRecord),State};
+
+process_update({ok,Data},{session_request,_SessionId,SessionRequest},State) ->
+	NewRecord=Data#m_etp_session{updated=m_etp_utils:get_utc_timestamp(),session_request=SessionRequest},
+	F = fun() ->
+		mnesia:write(m_etp_sessions,NewRecord,write)
+	end,
+	Result=mnesia:activity(transaction, F),
+	{reply,handle_mnesia_result(Result,NewRecord),State}.
+
+
+
 
 process_get(SessionId)->
    
@@ -86,7 +114,7 @@ handle_mnesia_result([])->
 handle_mnesia_result(ok,Record)->
 	 {ok,Record};
  
-handle_mnesia_result({error,Reason},Record)->
+handle_mnesia_result({error,Reason},_Record)->
 	 lager:error("Failed in creating sessionobject:~p",[Reason]),
 	 {error,failed_in_create_session_object};
 

@@ -1,6 +1,7 @@
 -record(m_etp_session,{
 		session_id,
 		created,
+		updated,
 		user,
 		status,
 		session_request
