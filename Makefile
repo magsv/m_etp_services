@@ -37,7 +37,16 @@ erlconnect:
 
 
 m_etp_server: app
-	exec erl -pa $(PWD)/apps/*/ebin -pa $(DEPS_DIR)/*/ebin -boot start_sasl  -mnesia dir '"$(MNESIA_DIR)"' -config $(APP_CNFG) -s crypto -s lager  -s m_etp_server -s m_etp_store -s m_etp_avro -sname m_etp 
+	exec erl -pa $(PWD)/apps/*/ebin -pa $(DEPS_DIR)/*/ebin -boot start_sasl  -mnesia dir '"$(MNESIA_DIR)"' -config $(APP_CNFG) -s crypto -s lager  -s m_etp_server -s m_etp_store -s m_etp_avro -sname m_etp
+
+docker_build_image:
+	sudo docker build -t m_etp_server ./docker/.
+
+docker_list_images:
+	sudo docker images 
+
+docker_run_bash:
+	sudo docker run -t -i m_etp_server /bin/bash
 
 
 
