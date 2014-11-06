@@ -40,7 +40,7 @@ websocket_handle({text, Msg}, Req, State) ->
 
 websocket_handle({binary,Data},Req,State)->
 	lager:info("Handling binary data..."),
-    %lager:info("Binary list data:~p",[binary_to_list(Data) ]),
+    gen_fsm:send_event(State#state.session_id,{Data}),
 	{ok, Req, State};
 	
 
