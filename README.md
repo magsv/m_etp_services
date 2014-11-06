@@ -7,9 +7,10 @@ The following repository is a test bed for the Energistics specification for nex
 
 Development status
 -------------------
-The current library is a early test bed implementation and focuses on testing out the underlying technology as part of the current Energistics ETP specification which utilises websockets and Apache Avro to defined the data transfer protocol. 
-The server test implementation is done in Erlang which is a language which is very well suited for this challenge. To demonstrate the language neutrality of the specification a python client has been used to test the Erlang server implementation.
-The server is currently implemented with cowboy as a front end and utilising mnesia as the backing session storage. For each connection a fsm is spawned keeping track of the different states as visible as part of the ETP specification. For the moment no errors from the backend is propagated back to the calling client as this has yet not been defined in the specification as well as how to handle session survailability in case of e.g. a network glitch. In case of a breakdown or that the calling client suddenly ends the websocket communication, the actual session will survive as part of the mnesia storage backend (utilising in memory and disk storage).
+The current library is a early test bed implementation and focuses on testing out the underlying technology as part of the current Energistics ETP specification which utilises websockets and Apache Avro to defined the data transfer protocol.   
+The server test implementation is done in Erlang which is a language which is very well suited for this challenge. To demonstrate the language neutrality of the specification a python client has been used to test the Erlang server implementation.  
+The server is currently implemented with cowboy as a front end and utilising mnesia as the backing session storage. For each connection a fsm is spawned keeping track of the different states as visible as part of the ETP specification.  
+For the moment no errors from the backend is propagated back to the calling client as this has yet not been defined in the specification as well as how to handle session survailability in case of e.g. a network glitch. In case of a breakdown or that the calling client suddenly ends the websocket communication, the actual session will survive as part of the mnesia storage backend (utilising in memory and disk storage).
 
 Python client requirements
 ==============
