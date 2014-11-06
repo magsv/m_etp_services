@@ -1,7 +1,7 @@
 -module (m_etp_protocol_fsm).
 -behaviour(gen_fsm).
 
--export([init/1, state_name/2, state_name/3, handle_event/3, handle_sync_event/4, handle_info/3, terminate/3, code_change/4]).
+-export([init/1,  handle_event/3, handle_sync_event/4, handle_info/3, terminate/3, code_change/4]).
 -export([start_link/1,disconnected/2,connected/2,hibernating/2,in_session/2]).
 -record(state,{sessionid}).
 
@@ -24,44 +24,43 @@ disconnected({connected},State)->
  %   lager:info("FSM connected,~p",[State#state.sessionid]),
  %   {next_state,connected,State};
 
+connected({hibernating},State)->
+    lager:info("FSM state move into hibernation awaiting rewake or clean,sessionId:~p",[State#state.sessionid]),
+    {next_state,hibernating,State};
 
 
-connected({Data},State)->
+connected({Data},State) when is_atom(Data)==false -> 
+    lager:info("Got data in connected state should be request session.."),
     {next_state,in_session,State}.
 
-in_session(Event,State)->
-    {next_state,in_session,State};
-
-
 in_session({close_session},State)->
-    {next_state,disconnected,State}.
+    {next_state,disconnected,State};
 
-hibernating(Event,State)->
+in_session(_Event,State)->
+    {next_state,in_session,State}.
+
+
+
+
+hibernating(_Event,State)->
     {next_state,hibernating,State}.
 
-state_name(Event, StateData) ->
-    {next_state, state_name, StateData}.
 
 
 
-state_name(Event, _From, StateData) ->
-    Reply = ok,
-    {reply, Reply, state_name, StateData}.
 
-
-
-handle_event(Event, StateName, StateData) ->
+handle_event(_Event, StateName, StateData) ->
     {next_state, StateName, StateData}.
 
 
 
-handle_sync_event(Event, _From, StateName, StateData) ->
+handle_sync_event(_Event, _From, StateName, StateData) ->
     Reply = ok,
     {reply, Reply, StateName, StateData}.
 
 
 
-handle_info(Info, StateName, StateData) ->
+handle_info(_Info, StateName, StateData) ->
     {next_state, StateName, StateData}.
 
 
