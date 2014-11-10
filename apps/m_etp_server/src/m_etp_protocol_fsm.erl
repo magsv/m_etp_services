@@ -34,8 +34,8 @@ connected({hibernating},State)->
 connected({Data},State) when is_atom(Data)==false -> 
     lager:info("Got data in connected state should be request session.."),
     % try to get the request session schema..
-    Result=m_etp_protocol_proxy:get_protocol("RequestSession"),
-    lager:info("Result of fetching request session protocol:~p",[Result]),
+    handle_protocol(request_session,m_etp_protocol_proxy:get_protocol("RequestSession"),State),
+   
     {next_state,in_session,State}.
 
 in_session({close_session},State)->
@@ -79,13 +79,17 @@ code_change(OldVsn, StateName, StateData, Extra) ->
     {ok, StateName, StateData}.
 
 
-handle_protocol({request_session,ok,no_data_found},State)->
+handle_protocol(request_session,{ok,no_data_found},State)->
     lager:info("Request session protocol not found"),
+    spawn(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,no_data_found}]),
     {next_state,connected,State};
 
-handle_protocol({request_session,error,Reason},State)->
+handle_protocol(request_session,{error,Reason},State)->
     lager:info("Request session protocol not found"),
+    spawn(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,Reason}]),
+
     {next_state,connected,State};
 
-handle_protocol({request_session,ok,Data},State) when is_atom(Data)==false ->
+handle_protocol(request_session,{ok,Data},State) when is_atom(Data)==false ->
+    lager:info("Protocol found parsing data..."),
     {next_state,connected,State}.

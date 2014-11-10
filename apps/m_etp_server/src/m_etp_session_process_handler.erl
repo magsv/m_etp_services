@@ -18,3 +18,11 @@ update_session_request_and_broadcast(SessionId,SessionRequest)->
 	gproc:send({p, l, {socket_session,SessionId}}, {self(), {socket_session,SessionId}, Result}).
 
 
+broadcast_data(SessionId,{error,Reason})->
+	gproc:send({p, l, {socket_session,SessionId}}, {self(), {socket_session,SessionId}, {error,Reason}});
+
+broadcast_data(SessionId,{ok,Data})->
+	gproc:send({p, l, {socket_session,SessionId}}, {self(), {socket_session,SessionId}, {ok,Data}}).
+
+
+
