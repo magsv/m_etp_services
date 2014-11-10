@@ -1,6 +1,7 @@
 -module (m_etp_session_process_handler).
 
--export ([create_session_and_broadcast/1,update_session_status_and_broadcast/2,update_session_request_and_broadcast/2]).
+-export ([create_session_and_broadcast/1,update_session_status_and_broadcast/2,
+	update_session_request_and_broadcast/2,broadcast_data/2]).
 
 create_session_and_broadcast(SessionId)->
    lager:info("In create session and broadcast with session id:~p",[SessionId]),
