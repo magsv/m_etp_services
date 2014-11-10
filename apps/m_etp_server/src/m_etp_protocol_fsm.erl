@@ -3,6 +3,8 @@
 
 -export([init/1,  handle_event/3, handle_sync_event/4, handle_info/3, terminate/3, code_change/4]).
 -export([start_link/1,disconnected/2,connected/2,hibernating/2,in_session/2]).
+
+
 -record(state,{sessionid}).
 
 start_link(SessionId)->
@@ -31,6 +33,9 @@ connected({hibernating},State)->
 
 connected({Data},State) when is_atom(Data)==false -> 
     lager:info("Got data in connected state should be request session.."),
+    % try to get the request session schema..
+    Result=m_etp_protocol_proxy:get_protocol("RequestSession"),
+    lager:info("Result of fetching request session protocol:~p",[Result]),
     {next_state,in_session,State}.
 
 in_session({close_session},State)->
@@ -74,4 +79,13 @@ code_change(OldVsn, StateName, StateData, Extra) ->
     {ok, StateName, StateData}.
 
 
+handle_protocol({request_session,ok,no_data_found},State)->
+    lager:info("Request session protocol not found"),
+    {next_state,connected,State};
 
+handle_protocol({request_session,error,Reason},State)->
+    lager:info("Request session protocol not found"),
+    {next_state,connected,State};
+
+handle_protocol({request_session,ok,Data},State) when is_atom(Data)==false ->
+    {next_state,connected,State}.

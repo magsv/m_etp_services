@@ -68,11 +68,11 @@ process_delete(SessionId,State)->
 			 mnesia:delete({m_etp_sessions,SessionId})
   	end,
   	Result=mnesia:transaction(F),
-    {reply,handle_mnesia_result(Result,delete_mobject),State}.
+    {reply,handle_mnesia_result(Result,delete_session),State}.
 
 
 process_create({ok,no_data_found},SessionId,State)->
-	NewRecord=#m_etp_session{session_id=SessionId,created=m_etp_utils:get_utc_timestamp(),status=connected},
+	NewRecord=#m_etp_session{session_id=SessionId,created=m_etp_utils:get_utc_timestamp(),status=connected,updated=m_etp_utils:get_utc_timestamp()},
 	F = fun() ->
 		mnesia:write(m_etp_sessions,NewRecord,write)
 	end,
@@ -130,4 +130,4 @@ handle_mnesia_result({atomic,ok},delete_session)->
 
  handle_mnesia_result({aborted,Reason},delete_session)->
  	lager:error("Failed in delete of m_etp_protocol:~p",[Reason]),
-	{error,failed_in_delete_m_etp_protocol}.
+	{error,failed_in_delete_m_etp_session}.
