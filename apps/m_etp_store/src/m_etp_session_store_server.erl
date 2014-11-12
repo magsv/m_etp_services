@@ -63,6 +63,7 @@ code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
 
 process_delete(SessionId,State)->
+	
 	F = fun() ->
             
 			 mnesia:delete({m_etp_sessions,SessionId})

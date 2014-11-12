@@ -66,7 +66,8 @@ websocket_info({_PID,{socket_session,_},{ok,{m_etp_session,StoredSession,_,_,_,_
 
 websocket_info({_PID,{socket_session,_SessionId},{error,Msg}},Req,State)->
     lager:info("Got message broadcast error:~p,",[Msg]),
-    {ok,Req,State};
+    %need to respond with an error message
+    {shutdown, Req, State};
 
 
 websocket_info({timeout, _Ref, Msg}, Req, State) ->
@@ -76,8 +77,21 @@ websocket_info(Info, Req, State) ->
     lager:info("Got unknow req msg:~p",[Info]),
 	{ok, Req, State}.
 
-websocket_terminate(_Reason, _Req, State) ->
-    lager:info("Socket terminated for session id:~p",[State#state.session_id]),
+websocket_terminate({remote,_,_},_Req,State)->
+    lager:info("Remote peer closed session"),
+    spawn(m_etp_session_process_handler,update_session_status_and_broadcast,[State#state.session_id,hibernating]),
+    gen_fsm:send_event(State#state.session_id,{hibernating});
+
+websocket_terminate({normal,shutdown},_Req,State)->
+    lager:info("Server peer closed session,cleaning up"),
+    spawn(m_etp_session_proxy,delete_session,[State#state.session_id]),
+    gen_fsm:send_all_state_event(State#state.session_id,{stop}),
+    timer:sleep(100), 
+    m_etp_protocol_fsm_sup:remove_session(State#state.session_id);
+
+websocket_terminate(Reason, _Req, State) ->
+
+    lager:info("Socket terminated for session id:~p, reason:~p",[State#state.session_id,Reason]),
     %broadcast status change and move fsm over into hibernating state
 
     spawn(m_etp_session_process_handler,update_session_status_and_broadcast,[State#state.session_id,hibernating]),

@@ -31,6 +31,7 @@ content_types_accepted(Req, State) ->
 
 
 handle_post_json(Req,State)->
+	lager:info("Got post.."),
     {Method, Req2} = cowboy_req:method(Req),
 	HasBody=cowboy_req:has_body(Req2),
 	process_post_body(HasBody,Method,Req2,State).

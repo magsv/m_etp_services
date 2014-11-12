@@ -4,6 +4,7 @@
 -export([init/1,  handle_event/3, handle_sync_event/4, handle_info/3, terminate/3, code_change/4]).
 -export([start_link/1,disconnected/2,connected/2,hibernating/2,in_session/2]).
 
+-include_lib("../m_etp_store/include/m_etp_data.hrl").
 
 -record(state,{sessionid}).
 
@@ -31,10 +32,16 @@ connected({hibernating},State)->
     {next_state,hibernating,State};
 
 
-connected({Data},State) when is_atom(Data)==false -> 
+connected({closed},State)->
+    lager:info("FMS state move into closed awaiting possible rewake or clean"),
+    {next_state,disconnected,State};
+
+
+
+connected({RequestData},State) when is_atom(RequestData)==false -> 
     lager:info("Got data in connected state should be request session.."),
     % try to get the request session schema..
-    handle_protocol(request_session,m_etp_protocol_proxy:get_protocol("RequestSession"),State),
+    handle_protocol(request_session,m_etp_protocol_proxy:get_protocol(<<"RequestSession">>),RequestData,State),
    
     {next_state,in_session,State}.
 
@@ -51,7 +58,9 @@ hibernating(_Event,State)->
     {next_state,hibernating,State}.
 
 
-
+handle_event({stop}, _StateName, State) ->
+lager:info("FSM with session id told to stop and shutdown,~p",[State#state.sessionid]),
+{ stop, normal, State };
 
 
 handle_event(_Event, StateName, StateData) ->
@@ -79,17 +88,28 @@ code_change(OldVsn, StateName, StateData, Extra) ->
     {ok, StateName, StateData}.
 
 
-handle_protocol(request_session,{ok,no_data_found},State)->
+handle_protocol(request_session,{ok,no_data_found},_RequestData,State)->
     lager:info("Request session protocol not found"),
     spawn(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,no_data_found}]),
     {next_state,connected,State};
 
-handle_protocol(request_session,{error,Reason},State)->
+handle_protocol(request_session,{error,Reason},_RequestData,State)->
     lager:info("Request session protocol not found"),
     spawn(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,Reason}]),
 
     {next_state,connected,State};
 
-handle_protocol(request_session,{ok,Data},State) when is_atom(Data)==false ->
+handle_protocol(request_session,{ok,Schema},RequestData,State) when is_atom(Schema)==false ->
     lager:info("Protocol found parsing data..."),
+    {SchemaParsed,OCFResult}=eavro_ocf_codec:decode(RequestData,undefined),
+    lager:info("Parsed schema:~p",[SchemaParsed]),
+    lager:info("Result of ocf:~p",[OCFResult]),
+
+    %lager:info("Schema request data:~p",[RequestData]),
+    %SchemaParsed=eavro:parse_schema(Schema#m_etp_protocol.raw_schema),
+    %lager:info("Schema parsed:~p",[SchemaParsed]),
+    %Result1=eavro:decode(SchemaParsed,Schema),
+    %lager:info("Result of decode1:~p",[Result1]),
+    %Result=eavro:decode(Schema#m_etp_protocol.compiled_schema,RequestData),
+    %lager:info("Result of decode:~p",[Result]),
     {next_state,connected,State}.

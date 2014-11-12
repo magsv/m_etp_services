@@ -1,6 +1,6 @@
 -module (m_etp_protocol_fsm_sup).
 -export([start_link/0]).
--export([attach_session/1]).
+-export([attach_session/1,remove_session/1]).
 -behaviour(supervisor).
 -export([init/1]).
 
@@ -21,6 +21,11 @@ attach_session(SessionId) ->
 			         transient, 2000, worker, [m_etp_protocol_fsm]},
 	    supervisor:start_child(?MODULE, ChildSpec).
     %end.
+
+remove_session(SessionId)->
+	lager:info("Removing session with id:~p from supervision",[SessionId]),
+	Result=supervisor:delete_child(?MODULE,SessionId),
+	lager:info("Result of remove child from supervisor:~p",[Result]).
 
 init([]) ->
 	{ok, { {one_for_one, 5, 10}, []} }.
