@@ -16,6 +16,18 @@ init(_Args) ->
 
 
 
+handle_call({decode,binary,Data},_From,State)->
+	lager:info("IN decode binary"),
+	try eavro_ocf_codec:decode(<<"Data">>,undefined) of 
+		Any ->
+			lager:info("Decoded ok")
+	catch 
+		_:Reason -> 
+			lager:error("Failed in decode:~p",[Reason])
+		
+	end,
+	{reply,{ok},State};
+
 
 %% @private
 handle_call(_Request, _From, State) ->
@@ -30,7 +42,8 @@ handle_info(_Info, State) ->
 	{noreply, State}.
 
 %% @private
-terminate(_Reason, _State) ->
+terminate(Reason, _State) ->
+	lager:error("Avro codec server terminate with reason:~p",[Reason]),
 	ok.
 
 %% @private

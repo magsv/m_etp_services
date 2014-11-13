@@ -13,7 +13,6 @@ start_link(SessionId,Encoding)->
     gen_fsm:start_link({local,SessionId},?MODULE,{SessionId,Encoding},[]).
 
 init({SessionId,Encoding}) ->
-    process_flag(trap_exit, true),
     lager:info("Init gen fsm with session id:~p and serialization type:~p",[SessionId,Encoding]),
 	{ok, disconnected, #state{sessionid=SessionId,encoding=Encoding}}.
 
@@ -103,7 +102,8 @@ handle_protocol(request_session,{error,Reason},_RequestData,State)->
 
 handle_protocol(request_session,{ok,Schema},RequestData,State) when is_atom(Schema)==false ->
     lager:info("Protocol found parsing data..."),
-    spawn_link(m_etp_codec_avro,decode,[binary,RequestData]),
+    m_etp_avro_codec_proxy:decode({binary,RequestData}),
+    %spawn_link(m_etp_codec_avro,decode,[binary,RequestData]),
     %{SchemaParsed,OCFResult}=eavro_ocf_codec:decode(RequestData,undefined),
     %lager:info("Parsed schema:~p",[SchemaParsed]),
     %lager:info("Result of ocf:~p",[OCFResult]),
