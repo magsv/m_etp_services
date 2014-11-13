@@ -15,6 +15,7 @@ init({tcp, http}, _Req, _Opts) ->
 	{upgrade, protocol, cowboy_websocket}.
 
 websocket_init(_TransportName, Req, _Opts) ->
+
 	case cowboy_req:parse_header(<<"sec-websocket-protocol">>, Req) of
         {ok, undefined, Req2} ->
             {ok, Req2, #state{}};
@@ -22,17 +23,39 @@ websocket_init(_TransportName, Req, _Opts) ->
         	
             case lists:member(<<"energistics-tp">>,Subprotocols) of
                 true ->
-                    Req3 = cowboy_req:set_resp_header(<<"sec-websocket-protocol">>,
-                        <<"energistics-tp">>, Req2),
+                    %check if we have an encoding defined
+                    {HasEncoding,_}=cowboy_req:header(<<"etp-encoding">>, Req2,undefined),
+                    case HasEncoding of 
+                        <<"binary">> ->
+                            handle_init_encoding({ok,binary},Req2);
+                        <<"binaryocf">> ->
+                            handle_init_encoding({ok,binaryocf},Req2);
+                        undefined->
+                            handle_init_encoding({ok,binary},Req2);
+                        _ ->
+                            handle_init_encoding({error,HasEncoding},Req2)
+                    end;
 
-                    self() ! post_init,
-                    {ok, Req3, #state{}};
+                    %Req3 = cowboy_req:set_resp_header(<<"sec-websocket-protocol">>,
+                    %    <<"energistics-tp">>, Req2),
+                    
+                    %self() ! post_init,
+                    %{ok, Req3, #state{}};
                 false ->
                 	lager:info("Unsupported protocol found, ~p...",[Subprotocols]),
                     {shutdown, Req2}
             end
     end.
-	
+
+handle_init_encoding({ok,Encoding},Req)->
+    	Req3 = cowboy_req:set_resp_header(<<"sec-websocket-protocol">>,
+                        <<"energistics-tp">>, Req),
+        self() ! {post_init,Encoding},
+        {ok, Req3, #state{}};
+
+handle_init_encoding({error,Encoding},Req)->
+        lager:error("Invalid encoding specified:~p, shutting down",[Encoding]),
+        {shutdown, Req}.
 
 websocket_handle({text, Msg}, Req, State) ->
 	lager:info("Handling test"),
@@ -50,11 +73,11 @@ websocket_handle(Data, Req, State) ->
 	lager:info("Ignoring other data:~p",[Data]),
 	{ok, Req, State}.
 
-websocket_info(post_init, Req, State) ->
+websocket_info({post_init,Encoding}, Req, State) ->
     SessionId=list_to_atom(m_etp_utils:get_session_token()),
     NewState=State#state{session_id=SessionId},
     lager:info("Websocket accepted with new sessionId:~p",[SessionId]),
-    m_etp_protocol_fsm_sup:attach_session(SessionId),
+    m_etp_protocol_fsm_sup:attach_session(SessionId,Encoding),
     gproc:reg({p, l, {socket_session,SessionId}}),
     gen_fsm:send_event(SessionId,{connected}),
 

@@ -6,10 +6,10 @@ def connect_ping_socket(host,protocol="energistics-tp"):
 	return create_connection("ws://"+host+"/m_etp_socket_ping",
 		header=["Sec-Websocket-Protocol: "+protocol])
 
-def connect_service_socket(host):
+def connect_service_socket(host,encoding="binary"):
 	logging.debug("Conneting to host:"+host)
 	return create_connection("ws://"+host+"/m_etp_socket_service",
-		header=["Sec-Websocket-Protocol: energistics-tp"])
+		header=["Sec-Websocket-Protocol: energistics-tp","etp-encoding : "+encoding])
 
 def connect_service_socket_node(host):
 	logging.debug("Conneting to host:"+host)

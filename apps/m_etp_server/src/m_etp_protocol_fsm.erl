@@ -2,19 +2,19 @@
 -behaviour(gen_fsm).
 
 -export([init/1,  handle_event/3, handle_sync_event/4, handle_info/3, terminate/3, code_change/4]).
--export([start_link/1,disconnected/2,connected/2,hibernating/2,in_session/2]).
+-export([start_link/2,disconnected/2,connected/2,hibernating/2,in_session/2]).
 
 -include_lib("../m_etp_store/include/m_etp_data.hrl").
 
--record(state,{sessionid}).
+-record(state,{sessionid,encoding}).
 
-start_link(SessionId)->
-    lager:info("Start link called. with args,~p",[SessionId]),
-    gen_fsm:start_link({local,SessionId},?MODULE,SessionId,[]).
+start_link(SessionId,Encoding)->
+    
+    gen_fsm:start_link({local,SessionId},?MODULE,{SessionId,Encoding},[]).
 
-init(SessionId) ->
-    lager:info("Init gen fsm with session id:~p",[SessionId]),
-	{ok, disconnected, #state{sessionid=SessionId}}.
+init({SessionId,Encoding}) ->
+    lager:info("Init gen fsm with session id:~p and serialization type:~p",[SessionId,Encoding]),
+	{ok, disconnected, #state{sessionid=SessionId,encoding=Encoding}}.
 
 
 disconnected({connected},State)->
@@ -33,7 +33,7 @@ connected({hibernating},State)->
 
 
 connected({closed},State)->
-    lager:info("FMS state move into closed awaiting possible rewake or clean"),
+    lager:info("FSM state move into closed awaiting possible rewake or clean"),
     {next_state,disconnected,State};
 
 

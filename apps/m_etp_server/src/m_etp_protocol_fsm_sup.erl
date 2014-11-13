@@ -1,6 +1,6 @@
 -module (m_etp_protocol_fsm_sup).
 -export([start_link/0]).
--export([attach_session/1,remove_session/1]).
+-export([attach_session/2,remove_session/1]).
 -behaviour(supervisor).
 -export([init/1]).
 
@@ -11,13 +11,13 @@ start_link() ->
 
 %% @private
 
-attach_session(SessionId) ->
+attach_session(SessionId,Encoding) ->
     %case hlr:lookup_id(SessionId) of
 	%{ok, _Pid}    ->
 	%    {error, attached};
 	%_NotAttached ->
 		lager:info("Attaching new m_etp_protocol_fsm with session id,~p",[SessionId]),
-	    ChildSpec = {SessionId, {m_etp_protocol_fsm, start_link, [SessionId]},
+	    ChildSpec = {SessionId, {m_etp_protocol_fsm, start_link, [SessionId,Encoding]},
 			         transient, 2000, worker, [m_etp_protocol_fsm]},
 	    supervisor:start_child(?MODULE, ChildSpec).
     %end.
