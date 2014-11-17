@@ -17,16 +17,12 @@ init(_Args) ->
 
 
 handle_call({decode,binary,Data},_From,State)->
-	lager:info("IN decode binary"),
-	try eavro_ocf_codec:decode(<<"Data">>,undefined) of 
-		Any ->
-			lager:info("Decoded ok")
-	catch 
-		_:Reason -> 
-			lager:error("Failed in decode:~p",[Reason])
-		
-	end,
+	Response=decode_data({binary,Data}),
+	{reply,Response,State};
+
+handle_call({encode,binary,Data,Schema},_From,State)->
 	{reply,{ok},State};
+
 
 
 %% @private
@@ -49,3 +45,13 @@ terminate(Reason, _State) ->
 %% @private
 code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
+
+decode_data({binary,Data})->
+	try eavro_ocf_codec:decode(Data,undefined) of 
+		Result ->
+			{ok,Result}
+	catch 
+		_:Reason ->
+			{error,Reason}
+		
+	end.

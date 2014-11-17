@@ -41,7 +41,7 @@ connected({closed},State)->
 connected({RequestData},State) when is_atom(RequestData)==false -> 
     lager:info("Got data in connected state should be request session.."),
     % try to get the request session schema..
-    handle_protocol(request_session,m_etp_protocol_proxy:get_protocol(<<"RequestSession">>),RequestData,State),
+    handle_protocol(request_session,m_etp_protocol_proxy:get_protocol(<<"RequestSession">>),State#state.encoding,RequestData,State),
    
     {next_state,in_session,State}.
 
@@ -80,29 +80,30 @@ handle_info(Info, StateName, StateData) ->
 
 
 
-terminate(Reason, StateName, StatData) ->
+terminate(_Reason, _StateName, _StatData) ->
     ok.
 
 
 
-code_change(OldVsn, StateName, StateData, Extra) ->
+code_change(_OldVsn, StateName, StateData, _Extra) ->
     {ok, StateName, StateData}.
 
 
-handle_protocol(request_session,{ok,no_data_found},_RequestData,State)->
+handle_protocol(request_session,{ok,no_data_found},_Encoding,_RequestData,State)->
     lager:info("Request session protocol not found"),
     spawn(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,no_data_found}]),
     {next_state,connected,State};
 
-handle_protocol(request_session,{error,Reason},_RequestData,State)->
+handle_protocol(request_session,{error,Reason},_Encoding,_RequestData,State)->
     lager:info("Request session protocol not found"),
     spawn(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,Reason}]),
 
     {next_state,connected,State};
 
-handle_protocol(request_session,{ok,Schema},RequestData,State) when is_atom(Schema)==false ->
+handle_protocol(request_session,{ok,Schema},binary,RequestData,State) when is_atom(Schema)==false ->
     lager:info("Protocol found parsing data..."),
-    m_etp_avro_codec_proxy:decode({binary,RequestData}),
+    Result=m_etp_avro_codec_proxy:decode({binary,RequestData}),
+    process_result(Result,decode,binary,State),
     %spawn_link(m_etp_codec_avro,decode,[binary,RequestData]),
     %{SchemaParsed,OCFResult}=eavro_ocf_codec:decode(RequestData,undefined),
     %lager:info("Parsed schema:~p",[SchemaParsed]),
@@ -116,3 +117,14 @@ handle_protocol(request_session,{ok,Schema},RequestData,State) when is_atom(Sche
     %Result=eavro:decode(Schema#m_etp_protocol.compiled_schema,RequestData),
     %lager:info("Result of decode:~p",[Result]),
     {next_state,connected,State}.
+
+
+process_result({error,Reason},decode,binary,State)->
+    lager:info("Failed in decode:~p",[Reason]),
+    spawn(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,failed_decode_binary}]),
+    {next_state,connected,State};
+
+
+process_result({ok,Decoded},decode,binary,State)->
+    lager:info("Got decoded data:~p",[Decoded]),
+    {next_state,in_session,State}.
