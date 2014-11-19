@@ -28,8 +28,8 @@ websocket_init(_TransportName, Req, _Opts) ->
                     case HasEncoding of 
                         <<"binary">> ->
                             handle_init_encoding({ok,binary},Req2);
-                        <<"binaryocf">> ->
-                            handle_init_encoding({ok,binaryocf},Req2);
+                        <<"binary_ocf">> ->
+                            handle_init_encoding({ok,binary_ocf},Req2);
                         undefined->
                             handle_init_encoding({ok,binary},Req2);
                         _ ->
@@ -76,12 +76,17 @@ websocket_handle(Data, Req, State) ->
 websocket_info({post_init,Encoding}, Req, State) ->
     SessionId=list_to_atom(m_etp_utils:get_session_token()),
     NewState=State#state{session_id=SessionId},
-    lager:info("Websocket accepted with new sessionId:~p",[SessionId]),
-    m_etp_protocol_fsm_sup:attach_session(SessionId,Encoding),
-    gproc:reg({p, l, {socket_session,SessionId}}),
-    gen_fsm:send_event(SessionId,{connected}),
-
-    {ok, Req, NewState};
+    %create the session and ensure it is propagated
+    case m_etp_session_proxy:create_session(NewState#state.session_id) of 
+        {error,_} -> 
+            {shutdown,Req,State};
+        {ok,_} -> 
+            lager:info("Websocket accepted with new sessionId:~p",[SessionId]),
+            m_etp_protocol_fsm_sup:attach_session(SessionId,Encoding),
+            gproc:reg({p, l, {socket_session,SessionId}}),
+            gen_fsm:send_event(SessionId,{connected}),
+            {ok, Req, NewState}
+    end;
 
 websocket_info({_PID,{socket_session,_},{ok,{m_etp_session,StoredSession,_,_,_,_,_}}},Req,State)->
     lager:info("Got ok session created and stored:~p,",[StoredSession]),

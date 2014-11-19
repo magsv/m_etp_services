@@ -20,12 +20,14 @@ init(_Args) ->
 
 
 handle_call({create_session,SessionId},_From,State)->
+	lager:info("IN create mnesia session"),
 	process_create(process_get(SessionId),SessionId,State);
 
 handle_call({get_session,SessionId},_From,State)->
 	{reply,process_get(SessionId),State};
 
 handle_call({update_session_status,SessionId,SessionStatus},_From,State)->
+    lager:info("Processing update session status with sessionId:~p",[SessionId]),
 	process_update(process_get(SessionId),{session_status,SessionId,SessionStatus},State);
 
 handle_call({update_session_request,SessionId,SessionRequest},_From,State)->
@@ -88,6 +90,7 @@ process_update({ok,no_data_found},{_,_SessionId,_SessionStatus},State)->
 
 
 process_update({ok,Data},{session_status,_SessionId,SessionStatus},State) ->
+
 	NewRecord=Data#m_etp_session{updated=m_etp_utils:get_utc_timestamp(),status=SessionStatus},
 	F = fun() ->
 		mnesia:write(m_etp_sessions,NewRecord,write)
@@ -96,6 +99,7 @@ process_update({ok,Data},{session_status,_SessionId,SessionStatus},State) ->
 	{reply,handle_mnesia_result(Result,NewRecord),State};
 
 process_update({ok,Data},{session_request,_SessionId,SessionRequest},State) ->
+    lager:info("Processing update session request:~p",[SessionRequest]),
 	NewRecord=Data#m_etp_session{updated=m_etp_utils:get_utc_timestamp(),session_request=SessionRequest},
 	F = fun() ->
 		mnesia:write(m_etp_sessions,NewRecord,write)
@@ -108,7 +112,12 @@ process_update({ok,Data},{session_request,_SessionId,SessionRequest},State) ->
 
 process_get(SessionId)->
    
-	Result=mnesia:dirty_read(m_etp_sessions,SessionId),
+	%Result=mnesia:dirty_read(m_etp_sessions,SessionId),
+	F = fun() ->
+		mnesia:read(m_etp_sessions,SessionId)
+	end,
+	Result=mnesia:activity(transaction, F),
+	lager:info("Result of get sessionid:~p",[Result]),
 	handle_mnesia_result(Result).
 
 
@@ -127,6 +136,7 @@ handle_mnesia_result({error,Reason},_Record)->
 	 {error,failed_in_create_session_object};
 
 handle_mnesia_result({atomic,ok},delete_session)->
+    lager:info("Cleaned out one session..."),
 	{ok,m_etp_session_deleted};
 
  handle_mnesia_result({aborted,Reason},delete_session)->

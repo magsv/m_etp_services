@@ -64,3 +64,9 @@ RUN mkdir /tools
 RUN cp /tmp/rebar/rebar /tools
 RUN ln -s /tools/rebar /usr/local/bin/rebar
 RUN rm -rf /tmp/*
+
+##Install m_etp_server source
+RUN mkdir /development
+WORKDIR /development
+
+

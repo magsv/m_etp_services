@@ -30,12 +30,22 @@ def get_request_session_test_data_dict():
 def getRequestSessionAvroFileName():
 	return "requestSession_test.avro"
 
+def getRequestSessionAvroFileNameBinary():
+	return "requestSession_test_binary.avro"
+
 
 def serializeRequestSessionToFile():
     	requestSessionSchema=get_requestsession_protocol()
     	outputFile=get_test_storage()+"/"+getRequestSessionAvroFileName()
         sessionData=get_request_session_test_data_dict()
-    	aUtils.serializeDataToFile(requestSessionSchema,outputFile,sessionData)
+    	aUtils.serializeDataToOCFFile(requestSessionSchema,outputFile,sessionData)
+
+def serializeRequestSessionToBinaryFile():
+
+    	requestSessionSchema=get_requestsession_protocol()
+    	outputFile=get_test_storage()+"/"+getRequestSessionAvroFileNameBinary()
+        sessionData=get_request_session_test_data_dict()
+        aUtils.serializeDataToBinaryFile(requestSessionSchema, outputFile,sessionData)
 
 
 def getSessionRequestDataToSend():

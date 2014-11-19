@@ -16,12 +16,20 @@ init(_Args) ->
 
 
 
-handle_call({decode,binary,Data},_From,State)->
-	Response=decode_data({binary,Data}),
+handle_call({decode,binary_ocf,Data},_From,State)->
+	Response=decode_data({binary_ocf,Data}),
+	{reply,Response,State};
+
+handle_call({encode,binary_ocf,Data},_From,State)->
+	{reply,{ok},State};
+
+handle_call({decode,binary,Data,Schema},_From,State)->
+    Response=decode_data({binary,Data,Schema}),
 	{reply,Response,State};
 
 handle_call({encode,binary,Data,Schema},_From,State)->
 	{reply,{ok},State};
+
 
 
 
@@ -46,7 +54,18 @@ terminate(Reason, _State) ->
 code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
 
-decode_data({binary,Data})->
+decode_data({binary,Data,Schema})->
+	try eavro:decode(Schema,Data) of 
+		Result ->
+			{ok,Result}
+	catch 
+		_:Reason ->
+			{error,Reason}
+		
+	end;
+	
+
+decode_data({binary_ocf,Data})->
 	try eavro_ocf_codec:decode(Data,undefined) of 
 		Result ->
 			{ok,Result}

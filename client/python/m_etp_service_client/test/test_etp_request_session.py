@@ -16,19 +16,33 @@ class Test(unittest.TestCase):
         pass
 
 
-    def testEstablishRequestSession(self):
+    '''def testEstablishRequestSessionOCF(self):
     	try:
-            logging.debug("Serializing request data to avron")
+            logging.debug("Serializing request data to avro ocf")
             tUtils.serializeRequestSessionToFile()
             dataToSend=fUtils.readFileToString(tUtils.get_test_storage()+"/"+tUtils.getRequestSessionAvroFileName())
-            ws=sConn.connect_service_socket(tUtils.get_servername())
+            ws=sConn.connect_service_socket(tUtils.get_servername(),"binary_ocf")
             ws.send_binary(dataToSend)
-            time.sleep(100)
+            #time.sleep(100)
             ws.close()
             logging.debug("Closed session brutally...")
             pass
         except Exception, e:
-    		self.fail("Error:"+str(e))
+    		self.fail("Error:"+str(e))'''
+
+    def testEstablishRequestSessionBinary(self):
+        try:
+            logging.debug("Serializing request data to avro binary without schema")
+            tUtils.serializeRequestSessionToBinaryFile()
+            dataToSend=fUtils.readFileToString(tUtils.get_test_storage()+"/"+tUtils.getRequestSessionAvroFileNameBinary())
+            ws=sConn.connect_service_socket(tUtils.get_servername(),"binary")
+            ws.send_binary(dataToSend)
+            #time.sleep(100)
+            ws.close()
+            logging.debug("Closed session brutally...")
+            pass
+        except Exception, e:
+            self.fail("Error:"+str(e))
        
 
 

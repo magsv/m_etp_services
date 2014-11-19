@@ -19,8 +19,6 @@ init({SessionId,Encoding}) ->
 
 disconnected({connected},State)->
     lager:info("Session id:~p is connected",[State#state.sessionid]),
-    lager:info("Intializing session state data"),
-    spawn(m_etp_session_process_handler,create_session_and_broadcast,[State#state.sessionid]),
     {next_state,connected,State}.
 
 %connected(Event,State)->
@@ -100,31 +98,29 @@ handle_protocol(request_session,{error,Reason},_Encoding,_RequestData,State)->
 
     {next_state,connected,State};
 
+handle_protocol(request_session,{ok,Schema},binary_ocf,RequestData,State) when is_atom(Schema)==false ->
+    lager:info("Handling binary ocf decode request session"),
+    Result=m_etp_avro_codec_proxy:decode({binary_ocf,RequestData}),
+    process_result(Result,decode,binary_ocf,State);
+
 handle_protocol(request_session,{ok,Schema},binary,RequestData,State) when is_atom(Schema)==false ->
-    lager:info("Protocol found parsing data..."),
-    Result=m_etp_avro_codec_proxy:decode({binary,RequestData}),
-    process_result(Result,decode,binary,State),
-    %spawn_link(m_etp_codec_avro,decode,[binary,RequestData]),
-    %{SchemaParsed,OCFResult}=eavro_ocf_codec:decode(RequestData,undefined),
-    %lager:info("Parsed schema:~p",[SchemaParsed]),
-    %lager:info("Result of ocf:~p",[OCFResult]),
-
-    %lager:info("Schema request data:~p",[RequestData]),
-    %SchemaParsed=eavro:parse_schema(Schema#m_etp_protocol.raw_schema),
-    %lager:info("Schema parsed:~p",[SchemaParsed]),
-    %Result1=eavro:decode(SchemaParsed,Schema),
-    %lager:info("Result of decode1:~p",[Result1]),
-    %Result=eavro:decode(Schema#m_etp_protocol.compiled_schema,RequestData),
-    %lager:info("Result of decode:~p",[Result]),
-    {next_state,connected,State}.
+    lager:info("Handling binary decode request session"),
+    Result=m_etp_avro_codec_proxy:decode({binary,RequestData,Schema#m_etp_protocol.compiled_schema}),
+    lager:info("Result of binary decode:~p",[Result]),
+    {next_state,in_session,State}.
 
 
-process_result({error,Reason},decode,binary,State)->
-    lager:info("Failed in decode:~p",[Reason]),
-    spawn(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,failed_decode_binary}]),
+
+process_result({error,Reason},decode,binary_ocf,State)->
+    lager:error("Failed in decode:~p",[Reason]),
+    spawn(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,failed_decode_binary_ocf}]),
     {next_state,connected,State};
 
 
-process_result({ok,Decoded},decode,binary,State)->
-    lager:info("Got decoded data:~p",[Decoded]),
+process_result({ok,Decoded},decode,binary_ocf,State)->
+    {Schema,Data}=Decoded,
+    lager:info("Schema:~p",[Schema]),
+    lager:info("Data:~p",[Data]),
+    spawn(m_etp_session_process_handler,update_session_request_and_broadcast,[State#state.sessionid,Data]),
     {next_state,in_session,State}.
+

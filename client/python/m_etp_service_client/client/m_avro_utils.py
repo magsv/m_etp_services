@@ -2,10 +2,10 @@ import avro.schema
 from avro.datafile import DataFileReader, DataFileWriter
 from avro.io import DatumReader, DatumWriter
 import logging
+import avro.io
+import io
 
-
-
-def serializeDataToFile(schemaFile,outputFile,dataToSerialize):
+def serializeDataToOCFFile(schemaFile,outputFile,dataToSerialize):
     logging.debug("Parsing in avro schema:"+schemaFile)
     schema=parse_schema(schemaFile)
     logging.debug("Writing avro data to:"+outputFile)
@@ -25,3 +25,15 @@ def deserializeDataFromFile2Str(inputFile):
 		data=data+str(item)
 	reader.close()
 	return data
+
+def serializeDataToBinaryFile(schemaFile,outputFile,dataToSerialize):
+	writer = io.BytesIO()
+	encoder = avro.io.BinaryEncoder(writer)
+	schema=parse_schema(schemaFile)
+	datum_writer = avro.io.DatumWriter(schema)
+	datum_writer.write(dataToSerialize, encoder)
+	raw_bytes=writer.getvalue()
+	newFile = open (outputFile, "wb")
+	newFile.write(raw_bytes)
+	newFile.close()
+	logging.debug("Binary data written to:"+outputFile)

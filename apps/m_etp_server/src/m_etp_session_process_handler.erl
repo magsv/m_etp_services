@@ -11,6 +11,7 @@ create_session_and_broadcast(SessionId)->
 update_session_status_and_broadcast(SessionId,Status)->
 	lager:info("In update session status and broadcast with session id:~p, status: ~p",[SessionId,Status]),
 	Result=m_etp_session_proxy:update_session_status(SessionId,Status),
+	lager:info("Result of update session status:~p",[Result]),
 	gproc:send({p, l, {socket_session,SessionId}}, {self(), {socket_session,SessionId}, Result}).
 
 update_session_request_and_broadcast(SessionId,SessionRequest)->
