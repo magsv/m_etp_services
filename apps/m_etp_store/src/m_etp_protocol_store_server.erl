@@ -62,7 +62,7 @@ process_delete(ProtocolName,State)->
 
 
 process_get(ProtocolName)->
-    lager:info("Checking for protocol with name:~p",[ProtocolName]),
+    lager:debug("Checking for protocol with name:~p",[ProtocolName]),
 	Result=mnesia:dirty_read(m_etp_protocol,ProtocolName),
 	handle_mnesia_result(Result).
 

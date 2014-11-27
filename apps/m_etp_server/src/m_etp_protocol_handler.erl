@@ -11,7 +11,7 @@
 -include_lib("../m_etp_store/include/m_etp_data.hrl").
 
 init(_Transport, _Req, []) ->
-	lager:info("Handling rest"),
+	lager:debug("Handling rest"),
 	{upgrade, protocol, cowboy_rest}.
 
 allowed_methods(Req, State) ->
@@ -31,7 +31,7 @@ content_types_accepted(Req, State) ->
 
 
 handle_post_json(Req,State)->
-	lager:info("Got post.."),
+	lager:debug("Got post.."),
     {Method, Req2} = cowboy_req:method(Req),
 	HasBody=cowboy_req:has_body(Req2),
 	process_post_body(HasBody,Method,Req2,State).
@@ -83,7 +83,7 @@ process_post_body(true,<<"POST">>,Req,State)->
 					handle_result({error,Reason},Req3,State,500)
 			end;
 		{error,Reason,Req3}->
-			lager:info("Error post"),
+			lager:debug("Error post"),
 			handle_result({error,Reason},Req3,State,500)
 	end;
 
@@ -100,12 +100,12 @@ process_post_body(true,<<"PUT">>,Req,State)->
 					handle_result({error,Reason},Req3,State,500)
 			end;
 		{error,Reason,Req3}->
-			lager:info("Error post"),
+			lager:debug("Error post"),
 			handle_result({error,Reason},Req3,State,500)
 	end;
 
 process_post_body(false,_Method,Req,State)->
-	lager:info("Processing body no body data found.."),
+	lager:debug("Processing body no body data found.."),
 	respond_with_body_and_code(<<"Missing body">>,Req,State,500).
 
 respond_with_body_and_code(Body,Req,State,StatusCode)->

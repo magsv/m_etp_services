@@ -12,20 +12,17 @@ start_link() ->
 %% @private
 
 attach_session(SessionId,Encoding) ->
-    %case hlr:lookup_id(SessionId) of
-	%{ok, _Pid}    ->
-	%    {error, attached};
-	%_NotAttached ->
-		lager:info("Attaching new m_etp_protocol_fsm with session id,~p",[SessionId]),
+    
+		lager:debug("Attaching new m_etp_protocol_fsm with session id,~p",[SessionId]),
 	    ChildSpec = {SessionId, {m_etp_protocol_fsm, start_link, [SessionId,Encoding]},
 			         transient, 2000, worker, [m_etp_protocol_fsm]},
 	    supervisor:start_child(?MODULE, ChildSpec).
-    %end.
+    
 
 remove_session(SessionId)->
-	lager:info("Removing session with id:~p from supervision",[SessionId]),
+	lager:debug("Removing session with id:~p from supervision",[SessionId]),
 	Result=supervisor:delete_child(?MODULE,SessionId),
-	lager:info("Result of remove child from supervisor:~p",[Result]).
+	lager:debug("Result of remove child from supervisor:~p",[Result]).
 
 init([]) ->
 	{ok, { {one_for_one, 5, 10}, []} }.

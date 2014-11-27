@@ -61,14 +61,14 @@ code_change(_OldVsn, State, _Extra) ->
 
 
 process_time_out_sessions(Timeout)->
-	lager:info("Scanning for timed out sessions..."),
+	lager:debug("Scanning for timed out sessions..."),
 	Sessions=get_timed_out_sessions(Timeout),
 	[{m_etp_session_proxy:delete_session(X)} || X <- Sessions].
 
 
 get_timed_out_sessions(Timeout) ->
 	TimeThreshold=m_etp_utils:get_utc_timestamp()-Timeout,
-	lager:info("Cleaning out sessions that do not have state connected  and last_updated<~p",[TimeThreshold]),
+	lager:debug("Cleaning out sessions that do not have state connected  and last_updated<~p",[TimeThreshold]),
     Sessions=do(qlc:q([X#m_etp_session.session_id || X <- mnesia:table(m_etp_sessions),
 			     X#m_etp_session.updated < TimeThreshold 
 			     ,X#m_etp_session.status/=connected

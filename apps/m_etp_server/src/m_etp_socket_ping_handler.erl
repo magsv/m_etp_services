@@ -29,17 +29,17 @@ websocket_init(_TransportName, Req, _Opts) ->
                         <<"energistics-tp">>, Req2),
                     {ok, Req3, #state{}};
                 false ->
-                	lager:info("Unsupported protocol found, ~p...",[Subprotocols]),
+                	lager:debug("Unsupported protocol found, ~p...",[Subprotocols]),
                     {shutdown, Req2}
             end
     end.
 	
 
 websocket_handle({text, Msg}, Req, State) ->
-	lager:info("In handling text"),
+	lager:debug("In handling text"),
 	{reply, {text, << "That's what she said! ", Msg/binary >>}, Req, State};
 websocket_handle(Data, Req, State) ->
-	lager:info("In handle other data:,~p",[Data]),
+	lager:debug("In handle other data:,~p",[Data]),
 	{ok, Req, State}.
 
 websocket_info({timeout, _Ref, Msg}, Req, State) ->
