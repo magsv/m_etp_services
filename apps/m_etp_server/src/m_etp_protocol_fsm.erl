@@ -104,7 +104,8 @@ handle_protocol(request_session,{ok,Schema},binary_ocf,RequestData,State) when i
     process_result(Result,decode,binary_ocf,State);
 
 handle_protocol(request_session,{ok,Schema},binary,RequestData,State) when is_atom(Schema)==false ->
-    lager:debug("Handling binary decode request session"),
+    lager:debug("Handling binary decode request session with compile schema:~p",[Schema#m_etp_protocol.compiled_schema]),
+
     Result=m_etp_avro_codec_proxy:decode({binary,RequestData,Schema#m_etp_protocol.compiled_schema}),
     process_result(Result,decode,binary,State),
     {next_state,in_session,State}.
@@ -124,14 +125,16 @@ process_result({error,Reason},decode,binary,State)->
 
 
 process_result({ok,Decoded},decode,binary_ocf,State)->
-    {Schema,Data}=Decoded,
+    {_,Data}=Decoded,
     lager:debug("Decoded binary ocf data:~p",[Data]),
     spawn(m_etp_session_process_handler,update_session_request_and_broadcast,[State#state.sessionid,Data]),
     {next_state,in_session,State};
 
 process_result({ok,Decoded},decode,binary,State)->
     lager:debug("Decoded binary data:~p",[Decoded]),
-    
+    {[ProtocolData,ApplicationName],_}=Decoded,
+    lager:debug("Application name requesting session:~p",[ApplicationName]),
+    m_etp_codec_utils:decode_session_request2record(ProtocolData),
     spawn(m_etp_session_process_handler,update_session_request_and_broadcast,[State#state.sessionid,Decoded]),
     {next_state,in_session,State}.
 

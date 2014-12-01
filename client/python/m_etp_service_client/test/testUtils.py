@@ -9,7 +9,7 @@ def get_requestsession_protocol():
 	return schemaFolder+"RequestSession.avsc"
 
 def get_request_session_test_data():
-	return {u'applicationName': u'TESTNAME', 
+	return {u'applicationName': u'TESTAPPLICATIONNAME', 
 	u'requestedProtocols': [
 		{u'role': u'Producer', 
 	u'protocolCapabilities': {u'TEST': {u'item': u'JALLA'}}, 
@@ -17,7 +17,7 @@ def get_request_session_test_data():
 	u'patch': 0, u'minor': 0, u'revision': 0}},
 	{u'role': u'Producer', 
 	u'protocolCapabilities': {u'TEST2': {u'item': u'JALLA2'}}, 
-	u'protocol': 4, u'protocolVersion': {u'major': 1, 
+	u'protocol': 5, u'protocolVersion': {u'major': 1, 
 	u'patch': 0, u'minor': 0, u'revision': 0}}
 							]
 		}
@@ -27,7 +27,7 @@ def get_test_storage():
 
 
 def get_request_session_test_data_dict():
-	return {u'applicationName': u'TESTNAME', 
+	return {u'applicationName': u'TESTAPPLICATIONNAME', 
 	u'requestedProtocols': [
 		{u'role': u'Producer', 
 	u'protocolCapabilities': {u'TEST': 
@@ -36,10 +36,12 @@ def get_request_session_test_data_dict():
 	u'patch': 0, u'minor': 0, u'revision': 0}},
 	{u'role': u'Producer', 
 	u'protocolCapabilities': {u'TEST2': 
-	{u'item': u'JALLA2'}}, u'protocol': 4, 
-	u'protocolVersion': {u'major': 1, 
+	{u'item': u'JALLA2'}}, u'protocol': 5, 
+	u'protocolVersion': {u'major': 2, 
 	u'patch': 0, u'minor': 0, u'revision': 0}}
 	]}
+
+
 
 def getRequestSessionAvroFileName():
 	return "requestSession_test.avro"
