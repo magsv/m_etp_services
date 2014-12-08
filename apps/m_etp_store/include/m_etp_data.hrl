@@ -7,6 +7,20 @@
 		session_request
 	}).
 
+-record(m_etp_session_data,{
+		session_id,
+		user,
+		protocol,
+		messagetype,
+		v_major,
+		v_minor,
+		revision,
+		patch,
+		role,
+		created
+
+	}).
+
 
 -record(m_etp_protocol,{
 	    name=erlang:error({required, name}),

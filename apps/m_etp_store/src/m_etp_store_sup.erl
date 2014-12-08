@@ -45,9 +45,17 @@ get_m_etp_protocol_pool()->
 	Result=poolboy:child_spec(m_etp_protocol_pool, PoolArgs, WorkerArgs),
 	Result.
 
+get_m_etp_session_data_pool()->
+	{ok, SessionDataCnfgArgs} = application:get_env(m_etp_store, m_etp_session_data_pool_config),
+	[{pool_cnfg,SessionDataCnfg},
+	 {worker_args,[WorkerArgs]}]=SessionDataCnfgArgs,
+	PoolArgs=[{name, {local, m_etp_session_data_pool}},
+			  {worker_module, m_etp_session_data_store_srv}]++SessionDataCnfg,
+	Result=poolboy:child_spec(m_etp_session_data_pool, PoolArgs, WorkerArgs),
+	Result.
 
 init([]) ->
     
-	Processes=[get_m_etp_session_pool(),get_m_etp_protocol_pool(),get_m_etp_session_time()],
+	Processes=[get_m_etp_session_pool(),get_m_etp_protocol_pool(),get_m_etp_session_time(),get_m_etp_session_data_pool()],
     {ok, { {one_for_one, 5, 10}, Processes} }.
 

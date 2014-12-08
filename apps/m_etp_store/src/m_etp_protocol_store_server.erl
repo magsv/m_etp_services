@@ -66,7 +66,7 @@ process_get(ProtocolName)->
 	Result=mnesia:dirty_read(m_etp_protocol,ProtocolName),
 	handle_mnesia_result(Result).
 
-process_update({ok,no_data_found},ProtocolRecord,State)->
+process_update({ok,no_data_found},_ProtocolRecord,State)->
 	{reply,{error,m_etp_protocol_not_exists},State};
 
 process_update({ok,Data},ProtocolRecord,State)->
@@ -86,7 +86,7 @@ process_create({ok,no_data_found},ProtocolRecord,State)->
 	{reply,handle_mnesia_result(Result,NewRecord),State};
 	
 
-process_create({ok,Data},ProtocolRecord,State) when is_atom(Data)==false->
+process_create({ok,Data},_ProtocolRecord,State) when is_atom(Data)==false->
 	{reply,{error,m_etp_protocol_exists},State}.
 
 
@@ -107,6 +107,6 @@ handle_mnesia_result({atomic,ok},delete_mobject)->
 handle_mnesia_result(ok,ProtocolRecord)->
 	 {ok,ProtocolRecord};
  
-handle_mnesia_result({error,Reason},ProtocolRecord)->
+handle_mnesia_result({error,Reason},_ProtocolRecord)->
 	 lager:error("Failed in creating protocolobject:~p",[Reason]),
 	 {error,failed_in_create_protocol_object}.

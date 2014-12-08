@@ -35,9 +35,12 @@ decode_json_protocol2record(Data)->
 
 
 decode_session_request2record(SessionRequest)->
-	[decode_session_protocol(X) || X <-SessionRequest].
+	{[ProtocolData,ApplicationName],_}=SessionRequest,
+
+	[decode_session_protocol(X) || X <-ProtocolData].
 	
 
 decode_session_protocol(SessionProtocol)->
+    [Protocol,Version,Role,[Capabilities]=SessionProtocol,
 	lager:debug("Decoding session reuest protocol:~p",SessionProtocol).
 	
