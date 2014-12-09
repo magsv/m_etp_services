@@ -17,7 +17,9 @@
 		revision,
 		patch,
 		role,
-		created
+		capabilities,
+		created,
+		application_name
 
 	}).
 

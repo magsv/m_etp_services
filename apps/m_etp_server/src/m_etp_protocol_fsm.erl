@@ -132,9 +132,9 @@ process_result({ok,Decoded},decode,binary_ocf,State)->
 
 process_result({ok,Decoded},decode,binary,State)->
     lager:debug("Decoded binary data:~p",[Decoded]),
-    {[ProtocolData,ApplicationName],_}=Decoded,
-    lager:debug("Application name requesting session:~p",[ApplicationName]),
-    m_etp_codec_utils:decode_session_request2record(ProtocolData),
+    %{[ProtocolData,ApplicationName],_}=Decoded,
+    %lager:debug("Application name requesting session:~p",[ApplicationName]),
+    m_etp_codec_utils:decode_session_request2record(Decoded),
     spawn(m_etp_session_process_handler,update_session_request_and_broadcast,[State#state.sessionid,Decoded]),
     {next_state,in_session,State}.
 

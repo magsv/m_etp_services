@@ -35,12 +35,31 @@ decode_json_protocol2record(Data)->
 
 
 decode_session_request2record(SessionRequest)->
+    lager:debug("Decoding session request:~p",[SessionRequest]),
 	{[ProtocolData,ApplicationName],_}=SessionRequest,
 
 	[decode_session_protocol(X) || X <-ProtocolData].
 	
 
 decode_session_protocol(SessionProtocol)->
-    [Protocol,Version,Role,[Capabilities]=SessionProtocol,
-	lager:debug("Decoding session reuest protocol:~p",SessionProtocol).
+	lager:debug("Decoding session request protocol:~p",[SessionProtocol]),
+    %[Protocol,Version,Role,Capabilities]=SessionProtocol.
+    [decode_protocol_data(X) || X <-SessionProtocol].
 	
+	
+decode_protocol_data(ProtocolData)->
+	lager:debug("Decoding protocol data:~p",[ProtocolData]),
+	[Protocol,Version,Role,Capabilities]=ProtocolData,
+	lager:debug("Protocol:~p",[Protocol]),
+	lager:debug("Version:~p",[Version]),
+	lager:debug("Role:~p",[Role]),
+	lager:debug("Capabilities:~p",[Capabilities]),
+	[VMajor,VMinor,Revision,Patch]=Version,
+	#m_etp_session_data{protocol=Protocol,
+					v_major=VMajor,
+					v_minor=VMinor,
+					revision=Revision,
+					patch=Patch,
+					role=Role,
+					capabilities=Capabilities
+	}.
