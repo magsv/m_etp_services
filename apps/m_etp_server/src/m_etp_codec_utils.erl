@@ -1,7 +1,7 @@
 -module (m_etp_codec_utils).
 -include_lib("../m_etp_store/include/m_etp_data.hrl").
 
--export([decode_json_protocol2record/1,decode_session_request2record/1]).
+-export([decode_session_request2record_with_id/2,decode_json_protocol2record/1,decode_session_request2record/1]).
 
 decode_json_protocol2record(Data)->
    try
@@ -33,13 +33,19 @@ decode_json_protocol2record(Data)->
 		{error,failed_in_decode_json}
     end.
 
+decode_session_request2record_with_id(SessionRequest,SessionId)->
+	lager:debug("Decoding session request:~p",[SessionRequest]),
+	{[[ProtocolData],ApplicationName],_}=SessionRequest,
+    Decoded=[decode_protocol_data(X) || X <-ProtocolData],
+	[add_session_data(SessionId,m_etp_utils:get_timestamp(),ApplicationName,X) || X <-Decoded].
 
 decode_session_request2record(SessionRequest)->
     lager:debug("Decoding session request:~p",[SessionRequest]),
-	{[ProtocolData,ApplicationName],_}=SessionRequest,
-
-	[decode_session_protocol(X) || X <-ProtocolData].
+	{[[ProtocolData],ApplicationName],_}=SessionRequest,
+    Decoded=[decode_protocol_data(X) || X <-ProtocolData],
+	[add_session_data("",m_etp_utils:get_timestamp(),ApplicationName,X) || X <-Decoded].
 	
+
 
 decode_session_protocol(SessionProtocol)->
 	lager:debug("Decoding session request protocol:~p",[SessionProtocol]),
@@ -63,3 +69,7 @@ decode_protocol_data(ProtocolData)->
 					role=Role,
 					capabilities=Capabilities
 	}.
+
+add_session_data(SessionId,Created,ApplicationName,SessionData)->
+	NewData=SessionData#m_etp_session_data{application_name=ApplicationName,session_id=SessionId,created=Created},
+	NewData.
