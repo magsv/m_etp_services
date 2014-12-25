@@ -132,8 +132,8 @@ process_result({ok,Decoded},decode,binary_ocf,State)->
 
 process_result({ok,Decoded},decode,binary,State)->
     lager:debug("Decoded binary data:~p",[Decoded]),
-    Decoded=m_etp_codec_utils:decode_session_request2record_with_id(Decoded,State#state.sessionid),
-    lager:debug("Result of decode sess req to record:"~p,[Decoded]),
+    DecodedRecord=m_etp_codec_utils:decode_session_request2record_with_id(Decoded,State#state.sessionid),
+    lager:debug("Result of decode sess req to record:~p",[Decoded]),
     spawn(m_etp_session_process_handler,update_session_request_and_broadcast,[State#state.sessionid,Decoded]),
     {next_state,in_session,State}.
 
