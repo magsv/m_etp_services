@@ -11,7 +11,6 @@
 		session_id,
 		user,
 		protocol,
-		messagetype,
 		v_major,
 		v_minor,
 		revision,
@@ -19,6 +18,7 @@
 		role,
 		capabilities,
 		created,
+		updated,
 		application_name
 
 	}).

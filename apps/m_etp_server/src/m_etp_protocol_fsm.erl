@@ -71,6 +71,15 @@ handle_sync_event(_Event, _From, StateName, StateData) ->
     {reply, Reply, StateName, StateData}.
 
 
+handle_info({'DOWN', _MonitorReference, process, _Pid, Reason},StateName,StateData) when not is_atom(Reason)->
+    lager:error("Recieved down signal from spawned process:~p",[Reason]),
+    {next_state, StateName, StateData};
+
+
+handle_info({'DOWN', _MonitorReference, process, _Pid, Reason},StateName,StateData) when is_atom(Reason)->
+    lager:debug("Spawned process exited normally:~p",[Reason]),
+    {next_state, StateName, StateData};
+
 
 handle_info(Info, StateName, StateData) ->
     lager:debug("Recieved info event:~p",[Info]),
@@ -89,12 +98,12 @@ code_change(_OldVsn, StateName, StateData, _Extra) ->
 
 handle_protocol(request_session,{ok,no_data_found},_Encoding,_RequestData,State)->
     lager:debug("Request session protocol not found"),
-    spawn(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,no_data_found}]),
+    spawn_monitor(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,no_data_found}]),
     {next_state,connected,State};
 
 handle_protocol(request_session,{error,Reason},_Encoding,_RequestData,State)->
     lager:debug("Request session protocol not found"),
-    spawn(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,Reason}]),
+    spawn_monitor(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,Reason}]),
 
     {next_state,connected,State};
 
@@ -114,12 +123,12 @@ handle_protocol(request_session,{ok,Schema},binary,RequestData,State) when is_at
 
 process_result({error,Reason},decode,binary_ocf,State)->
     lager:error("Failed in decode:~p",[Reason]),
-    spawn(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,failed_decode_binary_ocf}]),
+    spawn_monitor(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,failed_decode_binary_ocf}]),
     {next_state,connected,State};
 
 process_result({error,Reason},decode,binary,State)->
     lager:error("Failed in decode:~p",[Reason]),
-    spawn(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,failed_decode_binary}]),
+    spawn_monitor(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,failed_decode_binary}]),
     {next_state,connected,State};
 
 
@@ -127,13 +136,14 @@ process_result({error,Reason},decode,binary,State)->
 process_result({ok,Decoded},decode,binary_ocf,State)->
     {_,Data}=Decoded,
     lager:debug("Decoded binary ocf data:~p",[Data]),
-    spawn(m_etp_session_process_handler,update_session_request_and_broadcast,[State#state.sessionid,Data]),
+    spawn_monitor(m_etp_session_process_handler,update_session_request_and_broadcast,[State#state.sessionid,Data]),
     {next_state,in_session,State};
 
 process_result({ok,Decoded},decode,binary,State)->
     lager:debug("Decoded binary data:~p",[Decoded]),
     DecodedRecord=m_etp_codec_utils:decode_session_request2record_with_id(Decoded,State#state.sessionid),
-    lager:debug("Result of decode sess req to record:~p",[Decoded]),
-    spawn(m_etp_session_process_handler,update_session_request_and_broadcast,[State#state.sessionid,Decoded]),
+    lager:debug("Result of decode sess req to record:~p",[DecodedRecord]),
+    spawn_monitor(m_etp_session_process_handler,store_session_data_request_and_broadcast,[DecodedRecord]),
+    spawn_monitor(m_etp_session_process_handler,update_session_request_and_broadcast,[State#state.sessionid,Decoded]),
     {next_state,in_session,State}.
 

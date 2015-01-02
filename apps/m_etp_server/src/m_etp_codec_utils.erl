@@ -37,13 +37,16 @@ decode_session_request2record_with_id(SessionRequest,SessionId)->
 	lager:debug("Decoding session request:~p",[SessionRequest]),
 	{[[ProtocolData],ApplicationName],_}=SessionRequest,
     Decoded=[decode_protocol_data(X) || X <-ProtocolData],
-	[add_session_data(SessionId,m_etp_utils:get_timestamp(),ApplicationName,X) || X <-Decoded].
+	Return=[add_session_data(SessionId,m_etp_utils:get_timestamp(),ApplicationName,X) || X <-Decoded],
+	lager:debug("Returning session request record list:~p",[Return]),
+	Return.
 
 decode_session_request2record(SessionRequest)->
     lager:debug("Decoding session request:~p",[SessionRequest]),
 	{[[ProtocolData],ApplicationName],_}=SessionRequest,
     Decoded=[decode_protocol_data(X) || X <-ProtocolData],
 	[add_session_data("",m_etp_utils:get_timestamp(),ApplicationName,X) || X <-Decoded].
+
 	
 
 

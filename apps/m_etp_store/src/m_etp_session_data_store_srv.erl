@@ -22,7 +22,8 @@ init(_Args) ->
 
 handle_call({create_session_data,SessionData},_From,State)->
 	lager:debug("Creating session data for sessionid~p",[SessionData#m_etp_session_data.session_id]),
-	NewRecord=SessionData#m_etp_session_data{created=m_etp_utils:get_utc_timestamp()},
+	TimeStamp=m_etp_utils:get_utc_timestamp(),
+	NewRecord=SessionData#m_etp_session_data{created=TimeStamp,updated=TimeStamp},
 	F = fun() ->
 		mnesia:write(m_etp_session_data,NewRecord,write)
 	end,
@@ -30,7 +31,13 @@ handle_call({create_session_data,SessionData},_From,State)->
 	{reply,handle_mnesia_result(Result,NewRecord),State};
 
 handle_call({delete_session_data,SessionId},_From,State)->
-	{reply,ok,State};
+	lager:debug("Deleteing session data for session id:~p",[SessionId]),
+	F = fun() ->
+            
+			 mnesia:delete({m_etp_session_data,SessionId})
+  	end,
+  	Result=mnesia:transaction(F),
+    {reply,handle_mnesia_result(Result,delete_msessiondata),State};
 
 
 handle_call({get_session_data,SessionId},_From,State)->
@@ -58,7 +65,16 @@ code_change(_OldVsn, State, _Extra) ->
 
 handle_mnesia_result(ok,Record)->
 	 {ok,Record};
+
+handle_mnesia_result({atomic,ok},delete_msessiondata)->
+	{ok,m_etp_sessiondata_deleted};
+
+ handle_mnesia_result({aborted,Reason},delete_msessiondata)->
+ 	lager:error("Failed in delete of m_etp_sessiondata:~p",[Reason]),
+	{error,failed_in_delete_m_etp_sessiondata};
  
 handle_mnesia_result({error,Reason},_Record)->
 	 lager:error("Failed in creating session dataobject:~p",[Reason]),
 	 {error,failed_in_create_session_data}.
+
+

@@ -63,7 +63,8 @@ code_change(_OldVsn, State, _Extra) ->
 process_time_out_sessions(Timeout)->
 	lager:debug("Scanning for timed out sessions..."),
 	Sessions=get_timed_out_sessions(Timeout),
-	[{m_etp_session_proxy:delete_session(X)} || X <- Sessions].
+	[m_etp_session_proxy:delete_session(X) || X <- Sessions],
+	[m_etp_session_data_proxy:delete_session_data(X) || X <-Sessions].
 
 
 get_timed_out_sessions(Timeout) ->
