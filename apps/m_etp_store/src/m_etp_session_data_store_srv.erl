@@ -31,7 +31,7 @@ handle_call({create_session_data,SessionData},_From,State)->
 	{reply,handle_mnesia_result(Result,NewRecord),State};
 
 handle_call({delete_session_data,SessionId},_From,State)->
-	lager:debug("Deleteing session data for session id:~p",[SessionId]),
+	lager:debug("Deleting session data for session id:~p",[SessionId]),
 	F = fun() ->
             
 			 mnesia:delete({m_etp_session_data,SessionId})

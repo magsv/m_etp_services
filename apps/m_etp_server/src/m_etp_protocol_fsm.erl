@@ -73,6 +73,8 @@ handle_sync_event(_Event, _From, StateName, StateData) ->
 
 handle_info({'DOWN', _MonitorReference, process, _Pid, Reason},StateName,StateData) when not is_atom(Reason)->
     lager:error("Recieved down signal from spawned process:~p",[Reason]),
+    %broadcast the error back to the websocket creating the error
+    m_etp_session_process_handler:broadcast_data(StateData#state.sessionid,{error,m_controlling_process_faulted}),
     {next_state, StateName, StateData};
 
 
