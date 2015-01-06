@@ -1,0 +1,16 @@
+{
+  "type" : "record",
+  "name" : "ProtocolException",
+  "namespace" : "Energistics.Protocol.Core",
+  "fields" : [ {
+    "name" : "errorCode",
+    "type" : "int"
+  }, {
+    "name" : "errorMessage",
+    "type" : "string"
+  } ],
+  "messageType" : "1000",
+  "protocol" : "0",
+  "fullName" : "Energistics.Protocol.Core.ProtocolException",
+  "depends" : [ ]
+}

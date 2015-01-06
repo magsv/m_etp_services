@@ -1,0 +1,10 @@
+{
+  "type" : "record",
+  "name" : "Acknowledge",
+  "namespace" : "Energistics.Protocol.Core",
+  "fields" : [ ],
+  "messageType" : "1001",
+  "protocol" : "0",
+  "fullName" : "Energistics.Protocol.Core.Acknowledge",
+  "depends" : [ ]
+}
