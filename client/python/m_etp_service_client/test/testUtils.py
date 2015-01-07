@@ -6,7 +6,7 @@ def get_servername():
 	return "localhost:8080"
 
 def get_requestsession_protocol():
-	return schemaFolder+"RequestSession.avsc"
+	return schemaFolder+"Energistics.Protocol.Core.RequestSession.avsc"
 
 def get_request_session_test_data():
 	return {u'applicationName': u'TESTAPPLICATIONNAME', 
@@ -41,6 +41,20 @@ def get_request_session_test_data_dict():
 	u'patch': 0, u'minor': 0, u'revision': 0}}
 	]}
 
+def get_request_session_test_data_dict2():
+	return {u'applicationName': u'TESTAPPLICATIONNAME', 
+	u'requestedProtocols': [
+		{
+			u'role': u'Producer', 
+			u'protocolCapabilities': 
+			{u'TEST': 
+			{u'item': u'JALLA'}
+			}, u'protocol': 6, 
+			u'protocolVersion': {u'major': 1, 
+			u'patch': 0, u'minor': 0, u'revision': 0}
+		}
+	]}
+
 
 
 def getRequestSessionAvroFileName():
@@ -60,7 +74,7 @@ def serializeRequestSessionToBinaryFile():
 
     	requestSessionSchema=get_requestsession_protocol()
     	outputFile=get_test_storage()+"/"+getRequestSessionAvroFileNameBinary()
-        sessionData=get_request_session_test_data_dict()
+        sessionData=get_request_session_test_data_dict2()
         aUtils.serializeDataToBinaryFile(requestSessionSchema, outputFile,sessionData)
 
 

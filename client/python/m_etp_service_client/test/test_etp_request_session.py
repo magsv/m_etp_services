@@ -37,7 +37,9 @@ class Test(unittest.TestCase):
             dataToSend=fUtils.readFileToString(tUtils.get_test_storage()+"/"+tUtils.getRequestSessionAvroFileNameBinary())
             ws=sConn.connect_service_socket(tUtils.get_servername(),"binary")
             ws.send_binary(dataToSend)
-            #time.sleep(100)
+            result=ws.recv() 
+            logging.debug("Got result:"+str(result))
+            ws.send_binary(dataToSend)
             ws.close()
             logging.debug("Closed session brutally...")
             pass

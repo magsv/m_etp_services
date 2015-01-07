@@ -46,7 +46,8 @@ connected({RequestData},State) when is_atom(RequestData)==false ->
 in_session({close_session},State)->
     {next_state,disconnected,State};
 
-in_session(_Event,State)->
+in_session(Event,State)->
+    lager:debug("Got event:~p in in_session state",[Event]),
     {next_state,in_session,State}.
 
 
@@ -112,7 +113,9 @@ handle_protocol(request_session,{error,Reason},_Encoding,_RequestData,State)->
 handle_protocol(request_session,{ok,Schema},binary_ocf,RequestData,State) when is_atom(Schema)==false ->
     lager:debug("Handling binary ocf decode request session"),
     Result=m_etp_avro_codec_proxy:decode({binary_ocf,RequestData}),
-    process_result(Result,decode,binary_ocf,State);
+    process_result(Result,decode,binary_ocf,State),
+    {next_state,in_session,State};
+
 
 handle_protocol(request_session,{ok,Schema},binary,RequestData,State) when is_atom(Schema)==false ->
     lager:debug("Handling binary decode request session with compile schema:~p",[Schema#m_etp_protocol.compiled_schema]),
@@ -138,14 +141,13 @@ process_result({error,Reason},decode,binary,State)->
 process_result({ok,Decoded},decode,binary_ocf,State)->
     {_,Data}=Decoded,
     lager:debug("Decoded binary ocf data:~p",[Data]),
-    spawn_monitor(m_etp_session_process_handler,update_session_request_and_broadcast,[State#state.sessionid,Data]),
-    {next_state,in_session,State};
+    spawn_monitor(m_etp_session_process_handler,store_session_data_request_and_broadcast,[State#state.sessionid,Data]),
+    spawn_monitor(m_etp_session_process_handler,update_session_request_and_broadcast,[State#state.sessionid,Data]);
 
 process_result({ok,Decoded},decode,binary,State)->
     lager:debug("Decoded binary data:~p",[Decoded]),
     DecodedRecord=m_etp_codec_utils:decode_session_request2record_with_id(Decoded,State#state.sessionid),
-    lager:debug("Result of decode sess req to record:~p",[DecodedRecord]),
-    spawn_monitor(m_etp_session_process_handler,store_session_data_request_and_broadcast,[DecodedRecord]),
-    spawn_monitor(m_etp_session_process_handler,update_session_request_and_broadcast,[State#state.sessionid,Decoded]),
-    {next_state,in_session,State}.
+    spawn_monitor(m_etp_session_process_handler,store_session_data_request_and_broadcast,[State#state.sessionid,DecodedRecord]),
+    spawn_monitor(m_etp_session_process_handler,update_session_request_and_broadcast,[State#state.sessionid,Decoded]).
+    
 

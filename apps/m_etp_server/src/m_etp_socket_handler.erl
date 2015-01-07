@@ -90,6 +90,16 @@ websocket_info({_PID,{socket_session,_},{ok,{m_etp_session,StoredSession,_,_,_,_
     lager:debug("Got ok session created and stored:~p,",[StoredSession]),
     {ok,Req,State};
 
+websocket_info({_PID,{socket_session,_},{ok,session_data_request_stored}},Req,State)->
+    lager:debug("Got ok session data created and stored"),
+    {reply, {text, <<"Everything is ok">>}, Req, State};
+    %{ok,Req,State};
+
+
+
+
+
+
 websocket_info({_PID,{socket_session,_SessionId},{error,Msg}},Req,State)->
     lager:debug("Got message broadcast error:~p,",[Msg]),
     %need to respond with an error message
