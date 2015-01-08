@@ -39,9 +39,14 @@ connected({closed},State)->
 connected({RequestData},State) when is_atom(RequestData)==false -> 
     lager:debug("Got data in connected state should be request session.."),
     % try to get the request session schema..
-    handle_protocol(request_session,m_etp_protocol_proxy:get_protocol(<<"RequestSession">>),State#state.encoding,RequestData,State),
-   
+    handle_protocol(request_session,m_etp_protocol_proxy:get_protocol(<<"RequestSession">>),State#state.encoding,RequestData,State).
+
+session_acknowledge({ok,ValidProtocols},State)->
+    {next_state,in_session,State};
+
+session_acknowledge({error,Reason},State)->
     {next_state,in_session,State}.
+
 
 in_session({close_session},State)->
     {next_state,disconnected,State};
@@ -114,7 +119,7 @@ handle_protocol(request_session,{ok,Schema},binary_ocf,RequestData,State) when i
     lager:debug("Handling binary ocf decode request session"),
     Result=m_etp_avro_codec_proxy:decode({binary_ocf,RequestData}),
     process_result(Result,decode,binary_ocf,State),
-    {next_state,in_session,State};
+    {next_state,session_acknowledge,State};
 
 
 handle_protocol(request_session,{ok,Schema},binary,RequestData,State) when is_atom(Schema)==false ->
@@ -122,7 +127,7 @@ handle_protocol(request_session,{ok,Schema},binary,RequestData,State) when is_at
 
     Result=m_etp_avro_codec_proxy:decode({binary,RequestData,Schema#m_etp_protocol.compiled_schema}),
     process_result(Result,decode,binary,State),
-    {next_state,in_session,State}.
+    {next_state,session_acknowledge,State}.
 
 
 

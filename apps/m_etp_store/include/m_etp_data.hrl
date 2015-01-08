@@ -43,6 +43,7 @@
 
 -record(m_etp_valid_protocol,{
 		name=erlang:error({required, name}),
+		protocol_no,
 		v_major,
 		v_minor,
 		revision,

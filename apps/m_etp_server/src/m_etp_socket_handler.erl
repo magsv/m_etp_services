@@ -7,7 +7,7 @@
 -export([websocket_info/3]).
 -export([websocket_terminate/3]).
 
--record(state,{session_id}).
+-record(state,{session_id,session_stored,sesstion_request_stored}).
 
 -define(WSKey,{pubsub,wsbroadcast}).
 

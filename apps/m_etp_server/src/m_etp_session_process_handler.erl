@@ -24,10 +24,13 @@ store_session_data_request_and_broadcast(SessionId,SessReqRecList)->
 	Result=[store_session_data_request(X) || X <-SessReqRecList],
 	case lists:member({error,failed_in_create_session_data},Result) of 
 		true ->
-			broadcast_data(SessionId,{error,failed_store_session_request});
+			broadcast_data(SessionId,{error,failed_store_session_data_request});
 		false ->
 			broadcast_data(SessionId,{ok,session_data_request_stored})
 	end.
+
+get_valid_session_protocols_and_broadcast(SessionId)->
+	ok.
 
 
 store_session_data_request(SessReqRec)->

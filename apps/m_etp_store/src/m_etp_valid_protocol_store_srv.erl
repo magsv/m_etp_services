@@ -17,6 +17,12 @@ start_link(Args) ->
 init({}) ->
 	{ok, undefined}.
 
+
+handle_call({get_valid_protocols},_From,State)->
+	%%to do-----add proper handling of supported protocols
+    Supported=[build_record(1,1,0,0,0,consumer),build_record(2,1,0,0,0,consumer),build_record(1,1,0,0,0,producer),build_record(1,1,0,0,0,producer)],
+	{reply, {ok, Supported}, State};
+
 %% @private
 handle_call(_Request, _From, State) ->
 	{reply, {error, unknown_call}, State}.
@@ -36,3 +42,6 @@ terminate(_Reason, _State) ->
 %% @private
 code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
+
+build_record(Protocol,Major,Minor,Revision,Patch,Role)->
+	#m_etp_valid_protocol{protocol_no=Protocol,v_major=Major,v_minor=Minor,revision=Revision,patch=patch,role=Role}.
