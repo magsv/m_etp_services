@@ -8,6 +8,9 @@ def get_servername():
 def get_requestsession_protocol():
 	return schemaFolder+"Energistics.Protocol.Core.RequestSession.avsc"
 
+def get_message_header_protocol():
+	return schemaFolder+'Energistics.Datatypes.MessageHeader.avsc'
+
 def get_request_session_test_data():
 	return {u'applicationName': u'TESTAPPLICATIONNAME', 
 	u'requestedProtocols': [
@@ -21,6 +24,13 @@ def get_request_session_test_data():
 	u'patch': 0, u'minor': 0, u'revision': 0}}
 							]
 		}
+
+def get_messsage_header(protocol,correlationId,messageType,messageFlags=0):
+	return {u'messageFlags': 0, 
+	u'protocol': 0, 
+	u'correlationId': 0, 
+	u'messageType': 0, 
+	u'messageId': 0}
 
 def get_test_storage():
 	return "/media/magnus/hdd_1/projects/erlang/energistics/test_avro"
@@ -71,11 +81,13 @@ def serializeRequestSessionToFile():
     	aUtils.serializeDataToOCFFile(requestSessionSchema,outputFile,sessionData)
 
 def serializeRequestSessionToBinaryFile():
-
+        headerSchema=get_message_header_protocol()
     	requestSessionSchema=get_requestsession_protocol()
     	outputFile=get_test_storage()+"/"+getRequestSessionAvroFileNameBinary()
+    	headerData=get_messsage_header(0,0,1)
         sessionData=get_request_session_test_data_dict2()
-        aUtils.serializeDataToBinaryFile(requestSessionSchema, outputFile,sessionData)
+        aUtils.serializeDataToBinaryFileWithHeader(headerSchema,requestSessionSchema,headerData,sessionData,outputFile)
+        #aUtils.serializeDataToBinaryFile(requestSessionSchema, outputFile,sessionData)
 
 
 def getSessionRequestDataToSend():

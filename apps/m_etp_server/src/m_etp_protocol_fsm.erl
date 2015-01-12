@@ -95,7 +95,9 @@ handle_info(Info, StateName, StateData) ->
 
 
 
-terminate(_Reason, _StateName, _StatData) ->
+terminate(Reason, _StateName, State) ->
+    lager:error("Protocol fsm terminated:~p",[Reason]),
+    m_etp_session_process_handler:broadcast_data(State#state.sessionid,{error,protocol_fsm_error}),
     ok.
 
 
@@ -124,7 +126,8 @@ handle_protocol(request_session,{ok,Schema},binary_ocf,RequestData,State) when i
 
 handle_protocol(request_session,{ok,Schema},binary,RequestData,State) when is_atom(Schema)==false ->
     lager:debug("Handling binary decode request session with compile schema:~p",[Schema#m_etp_protocol.compiled_schema]),
-
+    MessageData=m_etp_avro_codec_proxy:decode({binary_message_header,RequestData}),
+    lager:debug("Result of decode message data:~p",[MessageData]),
     Result=m_etp_avro_codec_proxy:decode({binary,RequestData,Schema#m_etp_protocol.compiled_schema}),
     process_result(Result,decode,binary,State),
     {next_state,session_acknowledge,State}.
