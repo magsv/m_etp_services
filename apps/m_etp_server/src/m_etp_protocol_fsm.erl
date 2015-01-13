@@ -6,7 +6,7 @@
 
 -include_lib("../m_etp_store/include/m_etp_data.hrl").
 
--record(state,{sessionid,encoding}).
+-record(state,{sessionid,encoding,messageid}).
 
 start_link(SessionId,Encoding)->
     
@@ -39,7 +39,7 @@ connected({closed},State)->
 connected({RequestData},State) when is_atom(RequestData)==false -> 
     lager:debug("Got data in connected state should be request session.."),
     % try to get the request session schema..
-    handle_protocol(request_session,m_etp_protocol_proxy:get_protocol(<<"RequestSession">>),State#state.encoding,RequestData,State).
+    handle_protocol(request_session,m_etp_avro_codec_proxy:decode({binary_message_header,RequestData}),State#state.encoding,RequestData,State).
 
 session_acknowledge({ok,ValidProtocols},State)->
     {next_state,in_session,State};
@@ -106,10 +106,7 @@ code_change(_OldVsn, StateName, StateData, _Extra) ->
     {ok, StateName, StateData}.
 
 
-handle_protocol(request_session,{ok,no_data_found},_Encoding,_RequestData,State)->
-    lager:debug("Request session protocol not found"),
-    spawn_monitor(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,no_data_found}]),
-    {next_state,connected,State};
+
 
 handle_protocol(request_session,{error,Reason},_Encoding,_RequestData,State)->
     lager:debug("Request session protocol not found"),
@@ -117,42 +114,34 @@ handle_protocol(request_session,{error,Reason},_Encoding,_RequestData,State)->
 
     {next_state,connected,State};
 
-handle_protocol(request_session,{ok,Schema},binary_ocf,RequestData,State) when is_atom(Schema)==false ->
-    lager:debug("Handling binary ocf decode request session"),
-    Result=m_etp_avro_codec_proxy:decode({binary_ocf,RequestData}),
-    process_result(Result,decode,binary_ocf,State),
-    {next_state,session_acknowledge,State};
 
 
-handle_protocol(request_session,{ok,Schema},binary,RequestData,State) when is_atom(Schema)==false ->
-    lager:debug("Handling binary decode request session with compile schema:~p",[Schema#m_etp_protocol.compiled_schema]),
-    MessageData=m_etp_avro_codec_proxy:decode({binary_message_header,RequestData}),
-    lager:debug("Result of decode message data:~p",[MessageData]),
-    Result=m_etp_avro_codec_proxy:decode({binary,RequestData,Schema#m_etp_protocol.compiled_schema}),
-    process_result(Result,decode,binary,State),
+
+handle_protocol(request_session,{ok,DecodedPayload},binary,RequestData,State) when is_atom(DecodedPayload)==false ->
+    lager:debug("Processing request session with decoded message header and payload:~p",[DecodedPayload]),
+    {[Protocol,MessageType,_CorrelationId,MessageId,_MessageFlags],EnclosingMessage}=DecodedPayload,
+    Result=m_etp_avro_codec_proxy:decode({binary_protocol,EnclosingMessage,{Protocol,MessageType}}),
+    lager:debug("Result of decode payload:~p",[Result]),
+    %lager:debug("Handling binary decode request session with compile schema:~p",[Schema#m_etp_protocol.compiled_schema]),
+    %MessageData=m_etp_avro_codec_proxy:decode({binary_message_header,RequestData}),
+    %lager:debug("Result of decode message data:~p",[MessageData]),
+    %Result=m_etp_avro_codec_proxy:decode({binary,RequestData,Schema#m_etp_protocol.compiled_schema}),
+    process_result({Result,decode,binary,request_session,MessageId},State),
     {next_state,session_acknowledge,State}.
 
 
 
-process_result({error,Reason},decode,binary_ocf,State)->
-    lager:error("Failed in decode:~p",[Reason]),
-    spawn_monitor(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,failed_decode_binary_ocf}]),
-    {next_state,connected,State};
 
-process_result({error,Reason},decode,binary,State)->
+
+process_result({{error,Reason},decode,binary,_Type,_MessageId},State)->
     lager:error("Failed in decode:~p",[Reason]),
     spawn_monitor(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,failed_decode_binary}]),
     {next_state,connected,State};
 
 
 
-process_result({ok,Decoded},decode,binary_ocf,State)->
-    {_,Data}=Decoded,
-    lager:debug("Decoded binary ocf data:~p",[Data]),
-    spawn_monitor(m_etp_session_process_handler,store_session_data_request_and_broadcast,[State#state.sessionid,Data]),
-    spawn_monitor(m_etp_session_process_handler,update_session_request_and_broadcast,[State#state.sessionid,Data]);
 
-process_result({ok,Decoded},decode,binary,State)->
+process_result({{ok,Decoded},decode,binary,request_session,MessageId},State)->
     lager:debug("Decoded binary data:~p",[Decoded]),
     DecodedRecord=m_etp_codec_utils:decode_session_request2record_with_id(Decoded,State#state.sessionid),
     spawn_monitor(m_etp_session_process_handler,store_session_data_request_and_broadcast,[State#state.sessionid,DecodedRecord]),

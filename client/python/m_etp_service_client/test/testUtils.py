@@ -25,12 +25,13 @@ def get_request_session_test_data():
 							]
 		}
 
-def get_messsage_header(protocol,correlationId,messageType,messageFlags=0):
+def get_messsage_header(protocol,correlationId,messageType,messageId,messageFlags=0):
 	return {u'messageFlags': 0, 
-	u'protocol': 0, 
-	u'correlationId': 0, 
-	u'messageType': 0, 
-	u'messageId': 0}
+	u'protocol': protocol, 
+	u'correlationId': correlationId, 
+	u'messageType': messageType, 
+	u'messageId': messageId,
+	u'messageFlags': messageFlags}
 
 def get_test_storage():
 	return "/media/magnus/hdd_1/projects/erlang/energistics/test_avro"
@@ -84,7 +85,7 @@ def serializeRequestSessionToBinaryFile():
         headerSchema=get_message_header_protocol()
     	requestSessionSchema=get_requestsession_protocol()
     	outputFile=get_test_storage()+"/"+getRequestSessionAvroFileNameBinary()
-    	headerData=get_messsage_header(0,0,1)
+    	headerData=get_messsage_header(0,0,1,2)
         sessionData=get_request_session_test_data_dict2()
         aUtils.serializeDataToBinaryFileWithHeader(headerSchema,requestSessionSchema,headerData,sessionData,outputFile)
         #aUtils.serializeDataToBinaryFile(requestSessionSchema, outputFile,sessionData)

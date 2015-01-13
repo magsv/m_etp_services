@@ -13,6 +13,12 @@ decode({binary_message_header,Data})->
         					gen_server:call(Worker,{decode,binary_message_header,Data})
   	end);
 
+decode({binary_protocol,Data,{Protocol,MessageType}})->
+  poolboy:transaction(m_etp_avro_codec_pool, fun(Worker) ->
+                  gen_server:call(Worker,{decode,binary_protocol,Data,{Protocol,MessageType}})
+    end);
+
+
 decode({binary_ocf,Data})->
 	poolboy:transaction(m_etp_avro_codec_pool, fun(Worker) ->
         					gen_server:call(Worker,{decode,binary_ocf,Data})

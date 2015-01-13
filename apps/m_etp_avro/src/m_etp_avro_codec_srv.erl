@@ -6,7 +6,7 @@
 
 -define(SERVER, ?MODULE).
 
--record(state,{messageheader}).
+-record(state,{messageheader,requestsession}).
 -include_lib("../m_etp_store/include/m_etp_data.hrl").
 
 start_link(Args) ->
@@ -39,13 +39,23 @@ handle_call({decode,binary_message_header,Data},_From,State)->
     		{reply,Response,State}
     end;
 
+ 
+handle_call({decode,binary_protocol,Payload,{0,1}},_From,State)->
+	%decode request session protocol
+	process_decode(m_etp_protocol_proxy:get_protocol(<<"RequestSession">>),Payload,State);
+
+
+
+
+
+
 handle_call({decode,binary,Data,Schema},_From,State)->
 	Response=decode_data({binary,Data,Schema}),
     {reply,Response,State};
    
 	
 
-handle_call({encode,binary,Data,Schema},_From,State)->
+handle_call({encode,binary,_Data,_Schema},_From,State)->
 	{reply,{ok},State};
 
 
@@ -73,6 +83,12 @@ code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
 
 
+
+process_decode({ok,no_data_found},Payload,State)->
+	{reply,{error,unable_to_locate_requested_protocol},State};
+
+process_decode({ok,Schema},Payload,State) when is_atom(Schema)==false->
+	{reply,decode_data({binary,Payload,Schema#m_etp_protocol.compiled_schema}),State}.
 
 
 
