@@ -1,0 +1,130 @@
+{
+  "type" : "record",
+  "name" : "ChannelMetadata",
+  "namespace" : "Energistics.Protocol.ChannelDataFrame",
+  "fields" : [ {
+    "name" : "indexes",
+    "type" : {
+      "type" : "array",
+      "items" : {
+        "type" : "record",
+        "name" : "IndexMetadataRecord",
+        "namespace" : "Energistics.Datatypes.ChannelData",
+        "fields" : [ {
+          "name" : "indexType",
+          "type" : {
+            "type" : "enum",
+            "name" : "ChannelIndexTypes",
+            "symbols" : [ "Time", "Depth", "ElapsedTime" ],
+            "fullName" : "Energistics.Datatypes.ChannelData.ChannelIndexTypes",
+            "depends" : [ ]
+          }
+        }, {
+          "name" : "uom",
+          "type" : "string"
+        }, {
+          "name" : "datum",
+          "type" : [ "string", "null" ]
+        }, {
+          "name" : "direction",
+          "type" : {
+            "type" : "enum",
+            "name" : "IndexDirections",
+            "symbols" : [ "Increasing", "Decreasing" ],
+            "fullName" : "Energistics.Datatypes.ChannelData.IndexDirections",
+            "depends" : [ ]
+          }
+        }, {
+          "name" : "mnemonic",
+          "type" : [ "string", "null" ]
+        }, {
+          "name" : "description",
+          "type" : [ "string", "null" ]
+        }, {
+          "name" : "uri",
+          "type" : [ "string", "null" ]
+        } ],
+        "fullName" : "Energistics.Datatypes.ChannelData.IndexMetadataRecord",
+        "depends" : [ "Energistics.Datatypes.ChannelData.ChannelIndexTypes", "Energistics.Datatypes.ChannelData.IndexDirections" ]
+      }
+    }
+  }, {
+    "name" : "channels",
+    "type" : {
+      "type" : "array",
+      "items" : {
+        "type" : "record",
+        "name" : "ChannelMetadataRecord",
+        "namespace" : "Energistics.Datatypes.ChannelData",
+        "fields" : [ {
+          "name" : "channelUri",
+          "type" : "string"
+        }, {
+          "name" : "channelId",
+          "type" : "int"
+        }, {
+          "name" : "indexes",
+          "type" : {
+            "type" : "array",
+            "items" : "IndexMetadataRecord"
+          }
+        }, {
+          "name" : "mnemonic",
+          "type" : "string"
+        }, {
+          "name" : "dataType",
+          "type" : "string"
+        }, {
+          "name" : "uom",
+          "type" : "string"
+        }, {
+          "name" : "startIndex",
+          "type" : [ {
+            "type" : "record",
+            "name" : "IndexValue",
+            "fields" : [ {
+              "name" : "item",
+              "type" : [ {
+                "type" : "record",
+                "name" : "DateTime",
+                "namespace" : "Energistics.Datatypes",
+                "fields" : [ {
+                  "name" : "time",
+                  "type" : "long"
+                }, {
+                  "name" : "offset",
+                  "type" : "float"
+                } ],
+                "fullName" : "Energistics.Datatypes.DateTime",
+                "depends" : [ ]
+              }, "double", "long" ]
+            } ],
+            "fullName" : "Energistics.Datatypes.ChannelData.IndexValue",
+            "depends" : [ "Energistics.Datatypes.DateTime" ]
+          }, "null" ]
+        }, {
+          "name" : "endIndex",
+          "type" : [ "IndexValue", "null" ]
+        }, {
+          "name" : "description",
+          "type" : "string"
+        }, {
+          "name" : "status",
+          "type" : {
+            "type" : "enum",
+            "name" : "ChannelStatuses",
+            "symbols" : [ "Active", "Inactive", "Closed" ],
+            "fullName" : "Energistics.Datatypes.ChannelData.ChannelStatuses",
+            "depends" : [ ]
+          }
+        } ],
+        "fullName" : "Energistics.Datatypes.ChannelData.ChannelMetadataRecord",
+        "depends" : [ "Energistics.Datatypes.ChannelData.IndexMetadataRecord", "Energistics.Datatypes.ChannelData.IndexValue", "Energistics.Datatypes.ChannelData.IndexValue", "Energistics.Datatypes.ChannelData.ChannelStatuses" ]
+      }
+    }
+  } ],
+  "messageType" : "3",
+  "protocol" : "2",
+  "fullName" : "Energistics.Protocol.ChannelDataFrame.ChannelMetadata",
+  "depends" : [ "Energistics.Datatypes.ChannelData.IndexMetadataRecord", "Energistics.Datatypes.ChannelData.ChannelMetadataRecord" ]
+}

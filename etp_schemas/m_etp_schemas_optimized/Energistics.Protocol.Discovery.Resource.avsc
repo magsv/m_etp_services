@@ -1,0 +1,35 @@
+{
+  "type" : "record",
+  "name" : "Resource",
+  "namespace" : "Energistics.Protocol.Discovery",
+  "fields" : [ {
+    "name" : "uri",
+    "type" : "string"
+  }, {
+    "name" : "components",
+    "type" : {
+      "type" : "array",
+      "items" : {
+        "type" : "record",
+        "name" : "Component",
+        "namespace" : "Energistics.Datatypes.Object",
+        "fields" : [ {
+          "name" : "uri",
+          "type" : "string"
+        }, {
+          "name" : "name",
+          "type" : "string"
+        }, {
+          "name" : "subscribable",
+          "type" : "boolean"
+        } ],
+        "fullName" : "Energistics.Datatypes.Object.Component",
+        "depends" : [ ]
+      }
+    }
+  } ],
+  "messageType" : "2",
+  "protocol" : "3",
+  "fullName" : "Energistics.Protocol.Discovery.Resource",
+  "depends" : [ "Energistics.Datatypes.Object.Component" ]
+}

@@ -1,0 +1,54 @@
+{
+  "type" : "record",
+  "name" : "ChannelRangeRequest",
+  "namespace" : "Energistics.Protocol.ChannelStreaming",
+  "fields" : [ {
+    "name" : "channelRanges",
+    "type" : {
+      "type" : "array",
+      "items" : {
+        "type" : "record",
+        "name" : "ChannelRangeInfo",
+        "namespace" : "Energistics.Datatypes.ChannelData",
+        "fields" : [ {
+          "name" : "channelId",
+          "type" : "int"
+        }, {
+          "name" : "startIndex",
+          "type" : {
+            "type" : "record",
+            "name" : "IndexValue",
+            "fields" : [ {
+              "name" : "item",
+              "type" : [ {
+                "type" : "record",
+                "name" : "DateTime",
+                "namespace" : "Energistics.Datatypes",
+                "fields" : [ {
+                  "name" : "time",
+                  "type" : "long"
+                }, {
+                  "name" : "offset",
+                  "type" : "float"
+                } ],
+                "fullName" : "Energistics.Datatypes.DateTime",
+                "depends" : [ ]
+              }, "double", "long" ]
+            } ],
+            "fullName" : "Energistics.Datatypes.ChannelData.IndexValue",
+            "depends" : [ "Energistics.Datatypes.DateTime" ]
+          }
+        }, {
+          "name" : "endIndex",
+          "type" : "IndexValue"
+        } ],
+        "fullName" : "Energistics.Datatypes.ChannelData.ChannelRangeInfo",
+        "depends" : [ "Energistics.Datatypes.ChannelData.IndexValue", "Energistics.Datatypes.ChannelData.IndexValue" ]
+      }
+    }
+  } ],
+  "messageType" : "9",
+  "protocol" : "1",
+  "fullName" : "Energistics.Protocol.ChannelStreaming.ChannelRangeRequest",
+  "depends" : [ "Energistics.Datatypes.ChannelData.ChannelRangeInfo" ]
+}

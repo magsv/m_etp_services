@@ -1,0 +1,16 @@
+{
+  "type" : "record",
+  "name" : "Start",
+  "namespace" : "Energistics.Protocol.ChannelStreaming",
+  "fields" : [ {
+    "name" : "maxMessageRate",
+    "type" : "int"
+  }, {
+    "name" : "maxDataItems",
+    "type" : "int"
+  } ],
+  "messageType" : "0",
+  "protocol" : "1",
+  "fullName" : "Energistics.Protocol.ChannelStreaming.Start",
+  "depends" : [ ]
+}

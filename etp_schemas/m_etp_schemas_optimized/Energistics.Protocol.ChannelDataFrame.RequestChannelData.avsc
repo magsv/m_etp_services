@@ -1,0 +1,42 @@
+{
+  "type" : "record",
+  "name" : "RequestChannelData",
+  "namespace" : "Energistics.Protocol.ChannelDataFrame",
+  "fields" : [ {
+    "name" : "uri",
+    "type" : "string"
+  }, {
+    "name" : "fromIndex",
+    "type" : [ {
+      "type" : "record",
+      "name" : "IndexValue",
+      "namespace" : "Energistics.Datatypes.ChannelData",
+      "fields" : [ {
+        "name" : "item",
+        "type" : [ {
+          "type" : "record",
+          "name" : "DateTime",
+          "namespace" : "Energistics.Datatypes",
+          "fields" : [ {
+            "name" : "time",
+            "type" : "long"
+          }, {
+            "name" : "offset",
+            "type" : "float"
+          } ],
+          "fullName" : "Energistics.Datatypes.DateTime",
+          "depends" : [ ]
+        }, "double", "long" ]
+      } ],
+      "fullName" : "Energistics.Datatypes.ChannelData.IndexValue",
+      "depends" : [ "Energistics.Datatypes.DateTime" ]
+    }, "null" ]
+  }, {
+    "name" : "toIndex",
+    "type" : [ "Energistics.Datatypes.ChannelData.IndexValue", "null" ]
+  } ],
+  "messageType" : "1",
+  "protocol" : "2",
+  "fullName" : "Energistics.Protocol.ChannelDataFrame.RequestChannelData",
+  "depends" : [ "Energistics.Datatypes.ChannelData.IndexValue", "Energistics.Datatypes.ChannelData.IndexValue" ]
+}

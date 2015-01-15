@@ -1,0 +1,16 @@
+{
+  "type" : "record",
+  "name" : "ChannelDescribe",
+  "namespace" : "Energistics.Protocol.ChannelStreaming",
+  "fields" : [ {
+    "name" : "uris",
+    "type" : {
+      "type" : "array",
+      "items" : "string"
+    }
+  } ],
+  "messageType" : "1",
+  "protocol" : "1",
+  "fullName" : "Energistics.Protocol.ChannelStreaming.ChannelDescribe",
+  "depends" : [ ]
+}

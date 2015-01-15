@@ -1,0 +1,63 @@
+{
+  "type" : "record",
+  "name" : "ChannelStreamingStart",
+  "namespace" : "Energistics.Protocol.ChannelStreaming",
+  "fields" : [ {
+    "name" : "channels",
+    "type" : {
+      "type" : "array",
+      "items" : {
+        "type" : "record",
+        "name" : "ChannelStreamingInfo",
+        "namespace" : "Energistics.Datatypes.ChannelData",
+        "fields" : [ {
+          "name" : "channelId",
+          "type" : "int"
+        }, {
+          "name" : "startIndex",
+          "type" : {
+            "type" : "record",
+            "name" : "StreamingStartIndex",
+            "fields" : [ {
+              "name" : "item",
+              "type" : [ "null", "int", {
+                "type" : "record",
+                "name" : "IndexValue",
+                "fields" : [ {
+                  "name" : "item",
+                  "type" : [ {
+                    "type" : "record",
+                    "name" : "DateTime",
+                    "namespace" : "Energistics.Datatypes",
+                    "fields" : [ {
+                      "name" : "time",
+                      "type" : "long"
+                    }, {
+                      "name" : "offset",
+                      "type" : "float"
+                    } ],
+                    "fullName" : "Energistics.Datatypes.DateTime",
+                    "depends" : [ ]
+                  }, "double", "long" ]
+                } ],
+                "fullName" : "Energistics.Datatypes.ChannelData.IndexValue",
+                "depends" : [ "Energistics.Datatypes.DateTime" ]
+              } ]
+            } ],
+            "fullName" : "Energistics.Datatypes.ChannelData.StreamingStartIndex",
+            "depends" : [ "Energistics.Datatypes.ChannelData.IndexValue" ]
+          }
+        }, {
+          "name" : "receiveChangeNotification",
+          "type" : "boolean"
+        } ],
+        "fullName" : "Energistics.Datatypes.ChannelData.ChannelStreamingInfo",
+        "depends" : [ "Energistics.Datatypes.ChannelData.StreamingStartIndex" ]
+      }
+    }
+  } ],
+  "messageType" : "4",
+  "protocol" : "1",
+  "fullName" : "Energistics.Protocol.ChannelStreaming.ChannelStreamingStart",
+  "depends" : [ "Energistics.Datatypes.ChannelData.ChannelStreamingInfo" ]
+}

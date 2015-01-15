@@ -1,0 +1,41 @@
+{
+  "type" : "record",
+  "name" : "AddToStore",
+  "namespace" : "Energistics.Protocol.Store",
+  "fields" : [ {
+    "name" : "data",
+    "type" : {
+      "type" : "array",
+      "items" : {
+        "type" : "record",
+        "name" : "DataObject",
+        "namespace" : "Energistics.Datatypes.Object",
+        "fields" : [ {
+          "name" : "namespace",
+          "type" : "string"
+        }, {
+          "name" : "version",
+          "type" : "string"
+        }, {
+          "name" : "objectType",
+          "type" : "string"
+        }, {
+          "name" : "contentType",
+          "type" : "string"
+        }, {
+          "name" : "contentEncoding",
+          "type" : "string"
+        }, {
+          "name" : "data",
+          "type" : "bytes"
+        } ],
+        "fullName" : "Energistics.Datatypes.Object.DataObject",
+        "depends" : [ ]
+      }
+    }
+  } ],
+  "messageType" : "1",
+  "protocol" : "4",
+  "fullName" : "Energistics.Protocol.Store.AddToStore",
+  "depends" : [ "Energistics.Datatypes.Object.DataObject" ]
+}

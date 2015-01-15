@@ -1,0 +1,23 @@
+{
+  "type" : "record",
+  "name" : "ChannelStatusChange",
+  "namespace" : "Energistics.Protocol.ChannelStreaming",
+  "fields" : [ {
+    "name" : "channelId",
+    "type" : "int"
+  }, {
+    "name" : "status",
+    "type" : {
+      "type" : "enum",
+      "name" : "ChannelStatuses",
+      "namespace" : "Energistics.Datatypes.ChannelData",
+      "symbols" : [ "Active", "Inactive", "Closed" ],
+      "fullName" : "Energistics.Datatypes.ChannelData.ChannelStatuses",
+      "depends" : [ ]
+    }
+  } ],
+  "messageType" : "10",
+  "protocol" : "1",
+  "fullName" : "Energistics.Protocol.ChannelStreaming.ChannelStatusChange",
+  "depends" : [ "Energistics.Datatypes.ChannelData.ChannelStatuses" ]
+}
