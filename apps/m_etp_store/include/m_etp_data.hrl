@@ -25,6 +25,7 @@
 
 
 -record(m_etp_protocol,{
+		full_name=erlang:error({required,full_name}),
 	    name=erlang:error({required, name}),
 		protocol_no=erlang:error({required, protocol_no}),
 		message_type=erlang:error({required, message_type}),

@@ -2,7 +2,7 @@
 -behaviour(gen_fsm).
 
 -export([init/1,  handle_event/3, handle_sync_event/4, handle_info/3, terminate/3, code_change/4]).
--export([start_link/2,disconnected/2,connected/2,hibernating/2,in_session/2]).
+-export([start_link/2,disconnected/2,connected/2,hibernating/2,in_session/2,session_acknowledge/2]).
 
 -include_lib("../m_etp_store/include/m_etp_data.hrl").
 
@@ -36,10 +36,24 @@ connected({closed},State)->
 
 
 
-connected({RequestData},State) when is_atom(RequestData)==false -> 
+connected({[Protocol,MessageType,_CorrelationId,MessageId,_MessageFlags],EnclosingMessage},State) when Protocol==0,MessageType==1-> 
     lager:debug("Got data in connected state should be request session.."),
     % try to get the request session schema..
-    handle_protocol(request_session,m_etp_avro_codec_proxy:decode({binary_message_header,RequestData}),State#state.encoding,RequestData,State).
+    handle_protocol({Protocol,MessageType,MessageId,EnclosingMessage},State#state.encoding,State);
+
+connected({[Protocol,MessageType,_CorrelationId,_MessageId,_MessageFlags],_EnclosingMessage},State) when Protocol/=0;MessageType/=1-> 
+    lager:debug("Invalid message type recieved in connected state:Protocol,~p MessageType,~p",[Protocol,MessageType]),
+    spawn_monitor(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,invalid_protocol_for_state}]).
+
+
+session_acknowledge({[Protocol,MessageType,_CorrelationId,MessageId,_MessageFlags],EnclosingMessage},State)->
+    spawn_monitor(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,invalid_protocol_for_state}]),
+    {next_state,session_acknowledge,State};
+
+
+session_acknowledge({hibernating},State)->
+    lager:debug("FSM state move into hibernation awaiting rewake or clean,sessionId:~p",[State#state.sessionid]),
+    {next_state,hibernating,State};
 
 session_acknowledge({ok,ValidProtocols},State)->
     {next_state,in_session,State};
@@ -108,19 +122,14 @@ code_change(_OldVsn, StateName, StateData, _Extra) ->
 
 
 
-handle_protocol(request_session,{error,Reason},_Encoding,_RequestData,State)->
-    lager:debug("Request session protocol not found"),
-    spawn_monitor(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,Reason}]),
-
-    {next_state,connected,State};
 
 
 
 
-handle_protocol(request_session,{ok,DecodedPayload},binary,RequestData,State) when is_atom(DecodedPayload)==false ->
-    lager:debug("Processing request session with decoded message header and payload:~p",[DecodedPayload]),
-    {[Protocol,MessageType,_CorrelationId,MessageId,_MessageFlags],EnclosingMessage}=DecodedPayload,
-    Result=m_etp_avro_codec_proxy:decode({binary_protocol,EnclosingMessage,{Protocol,MessageType}}),
+
+handle_protocol({0,1,MessageId,EnclosingMessage},binary,State) ->
+    lager:debug("Processing request session with decoded message header and payload"),
+    Result=m_etp_avro_codec_proxy:decode({binary_protocol,EnclosingMessage,{0,1}}),
     lager:debug("Result of decode payload:~p",[Result]),
     %lager:debug("Handling binary decode request session with compile schema:~p",[Schema#m_etp_protocol.compiled_schema]),
     %MessageData=m_etp_avro_codec_proxy:decode({binary_message_header,RequestData}),

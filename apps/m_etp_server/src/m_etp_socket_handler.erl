@@ -61,8 +61,8 @@ websocket_handle({text, Msg}, Req, State) ->
 
 websocket_handle({binary,Data},Req,State)->
 	lager:debug("Handling binary data..."),
-    gen_fsm:send_event(State#state.session_id,{Data}),
-	{ok, Req, State};
+    self() ! {decode_payload,m_etp_avro_codec_proxy:decode({binary_message_header,Data})},
+    {ok, Req, State};
 	
 
 
@@ -70,6 +70,15 @@ websocket_handle({binary,Data},Req,State)->
 websocket_handle(Data, Req, State) ->
 	lager:debug("Ignoring other data:~p",[Data]),
 	{ok, Req, State}.
+
+websocket_info({decode_payload,{ok,Payload}},Req,State)->
+    lager:debug("Decoded message payload:~p",[Payload]),
+    gen_fsm:send_event(State#state.session_id,Payload),
+    {ok,Req,State};
+
+websocket_info({decode_payload,{error,Reason}},Req,State)->
+    lager:error("Failed in decode of payload:~p",[Reason]),
+    {ok,Req,State};
 
 websocket_info({post_init,Encoding}, Req, State) ->
     SessionId=list_to_atom(m_etp_utils:get_session_token()),
@@ -132,3 +141,5 @@ websocket_terminate(Reason, _Req, State) ->
     spawn(m_etp_session_process_handler,update_session_status_and_broadcast,[State#state.session_id,hibernating]),
     gen_fsm:send_event(State#state.session_id,{hibernating}),
 	ok.
+
+
