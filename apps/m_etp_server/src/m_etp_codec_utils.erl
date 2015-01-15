@@ -6,13 +6,15 @@
 decode_json_protocol2record(Data)->
    try
 		Decoded=jiffy:decode(Data),
+        %lager:debug("Decoded data:~p",[Data]),
 		Name=ej:get({"name"}, Decoded),
 		MessageType=ej:get({"messageType"},Decoded),
 		ProtocolNo=ej:get({"protocol"},Decoded),
 		NameSpace=ej:get({"namespace"},Decoded),
 		CompiledSchema=eavro:parse_schema(Data),
-		lager:debug("Parsed schema to:~p",[CompiledSchema]),
+		FullName=erlang:iolist_to_binary([NameSpace,<<".">>, Name]),
 		ETPProtocolRecord=#m_etp_protocol{
+			full_name=FullName,
 			name=Name,
 			protocol_no=ProtocolNo,
 			message_type=MessageType,
