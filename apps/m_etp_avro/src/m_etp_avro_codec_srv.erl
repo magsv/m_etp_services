@@ -29,7 +29,7 @@ handle_call({encode,binary_ocf,Data},_From,State)->
 handle_call({decode,binary_message_header,Data},_From,State)->
 	case State#state.messageheader of 
 		undefined -> 
-			{ok,HeaderSchema}=m_etp_protocol_proxy:get_protocol(<<"MessageHeader">>),
+			{ok,HeaderSchema}=m_etp_protocol_proxy:get_protocol(<<"Energistics.Datatypes.MessageHeader">>),
 			CompiledSchema=HeaderSchema#m_etp_protocol.compiled_schema,
 			NewState=State#state{messageheader=CompiledSchema},
 			Response=decode_data({binary,Data,CompiledSchema}),
@@ -42,8 +42,11 @@ handle_call({decode,binary_message_header,Data},_From,State)->
  
 handle_call({decode,binary_protocol,Payload,{0,1}},_From,State)->
 	%decode request session protocol
-	process_decode(m_etp_protocol_proxy:get_protocol(<<"RequestSession">>),Payload,State);
+	process_decode(m_etp_protocol_proxy:get_protocol(<<"Energistics.Protocol.Core.RequestSession">>),Payload,State);
 
+handle_call({decode,binary_protocol,Payload,{0,2}},_From,State)->
+	%decode open session protocol
+	process_decode(m_etp_protocol_proxy:get_protocol(<<"Energistics.Protocol.Core.OpenSession">>),Payload,State);
 
 
 

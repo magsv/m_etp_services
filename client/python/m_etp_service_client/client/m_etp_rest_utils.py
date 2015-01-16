@@ -1,8 +1,8 @@
 import requests
 import logging
 
-def post_json_data_to_service(serviceUrl,data):
-	headers = {'content-type': 'application/json'}
+def post_json_data_to_service(serviceUrl,data,encoding='application/json'):
+	headers = {'content-type': encoding}
 	r=requests.post(serviceUrl,data,headers=headers)
 	statusCode=r.status_code
 	logging.debug("Got status from server:"+str(statusCode))

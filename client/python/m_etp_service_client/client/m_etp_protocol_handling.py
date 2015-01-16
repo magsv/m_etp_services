@@ -13,6 +13,15 @@ def store_protocol(serverName,protocolFile):
 	except Exception, e:
 		raise e
 
+def deserializeAvroProtocol(serverName,protocolFullName,protocolFile):
+	try:
+		protocolServiceBase="http://"+serverName+"/m_etp_avro_codec/"+protocolFullName
+		logging.debug("Sending data to:"+protocolServiceBase)
+		data=fUtils.readFileToString(protocolFile)
+		rUtils.post_json_data_to_service(protocolServiceBase,data,'application/avro')
+	except Exception, e:
+		raise e
+
 def update_protocol(serverName,protocolFile):
 	try:
 		protocolServiceBase=serverName+"/m_etp_protocol_service"
