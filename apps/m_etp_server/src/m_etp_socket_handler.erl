@@ -101,18 +101,27 @@ websocket_info({_PID,{socket_session,_},{ok,{m_etp_session,StoredSession,_,_,_,_
 
 websocket_info({_PID,{socket_session,_},{ok,session_data_request_stored}},Req,State)->
     lager:debug("Got ok session data created and stored"),
-    {reply, {text, <<"Everything is ok">>}, Req, State};
-    %{ok,Req,State};
-
-
-
-
-
+    %{reply, {text, <<"Everything is ok">>}, Req, State};
+    {ok,Req,State};
 
 websocket_info({_PID,{socket_session,_SessionId},{error,Msg}},Req,State)->
     lager:debug("Got message broadcast error:~p,",[Msg]),
     %need to respond with an error message
     {shutdown, Req, State};
+
+
+
+%handle incoming binary avro response data to write to socket
+websocket_info({_PID,{socket_session,_SessionId},{error,_,Reason}},Req,State)->
+    lager:debug("Got message broadcast error:~p,",[Reason]),
+    %need to respond with an error message
+    {shutdown, Req, State};
+
+%write ok binary avro data to socket
+websocket_info({_PID,{socket_session,_SessionId},{ok,StateMode,Data}},Req,State)->
+    lager:debug("Got avro data in statemode:~p,",[StateMode]),
+    %just write it out
+    {reply, {binary, Data}, Req, State};
 
 
 websocket_info({timeout, _Ref, Msg}, Req, State) ->

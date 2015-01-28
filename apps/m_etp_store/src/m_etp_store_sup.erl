@@ -27,6 +27,11 @@ get_m_etp_session_time()->
 	[{worker_args,WorkerArgs}]=TimeCnfgArgs,
 	?CHILD(m_etp_session_time_server, worker,[WorkerArgs]).
 
+get_m_etp_session_ghost_time()->
+	{ok, TimeCnfgArgs} = application:get_env(m_etp_store, m_etp_session_ghost_server),
+	[{worker_args,WorkerArgs}]=TimeCnfgArgs,
+	?CHILD(m_etp_session_ghost_server, worker,[WorkerArgs]).
+
 get_m_etp_session_pool()->
 	{ok, SessionCnfgArgs} = application:get_env(m_etp_store, m_etp_session_pool_config),
 	[{pool_cnfg,SessionCnfg},
@@ -65,6 +70,6 @@ get_m_etp_valid_protocol_pool()->
 
 init([]) ->
     
-	Processes=[get_m_etp_session_pool(),get_m_etp_protocol_pool(),get_m_etp_session_time(),get_m_etp_session_data_pool(),get_m_etp_valid_protocol_pool()],
+	Processes=[get_m_etp_session_pool(),get_m_etp_protocol_pool(),get_m_etp_session_time(),get_m_etp_session_data_pool(),get_m_etp_valid_protocol_pool(),get_m_etp_session_ghost_time()],
     {ok, { {one_for_one, 5, 10}, Processes} }.
 

@@ -56,7 +56,9 @@ handle_call({decode,binary,Data,Schema},_From,State)->
 	Response=decode_data({binary,Data,Schema}),
     {reply,Response,State};
    
-	
+handle_call({encode,binary_protocol,Payload,{0,2}},_From,State)->
+	lager:debug("In encode opensession:~p",[Payload]),
+	process_encode(m_etp_protocol_proxy:get_protocol(<<"Energistics.Protocol.Core.OpenSession">>),Payload,State);
 
 handle_call({encode,binary,_Data,_Schema},_From,State)->
 	{reply,{ok},State};
@@ -94,6 +96,12 @@ process_decode({ok,Schema},Payload,State) when is_atom(Schema)==false->
 	{reply,decode_data({binary,Payload,Schema#m_etp_protocol.compiled_schema}),State}.
 
 
+process_encode({ok,no_data_found},Payload,State)->
+	{reply,{error,unable_to_locate_requested_protocol},State};
+
+process_encode({ok,Schema},Payload,State) when is_atom(Schema)==false->
+	{reply,encode_data({binary,Payload,Schema#m_etp_protocol.compiled_schema}),State}.
+
 
 decode_data({binary,Data,Schema})->
 	
@@ -106,10 +114,6 @@ decode_data({binary,Data,Schema})->
 		
 	end;
 
-
-	
-	
-
 decode_data({binary_ocf,Data})->
 	try eavro_ocf_codec:decode(Data,undefined) of 
 		Result ->
@@ -117,5 +121,18 @@ decode_data({binary_ocf,Data})->
 	catch 
 		_:Reason ->
 			{error,Reason}
+		
+	end.
+
+encode_data({binary,Data,Schema})->
+	lager:debug("Encode data:~p",[Data]),
+	%lager:debug("Encode data with schema:~p",[Schema]),
+    try eavro:encode(Schema,Data) of 
+		Result ->
+			{ok,Result}
+	catch 
+		_:Reason ->
+			lager:error("Error encode:~p",[Reason]),
+			{error,m_etp_failed_encode_to_avro}
 		
 	end.

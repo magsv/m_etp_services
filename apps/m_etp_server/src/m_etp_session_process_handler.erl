@@ -1,7 +1,7 @@
 -module (m_etp_session_process_handler).
 
 -export ([create_session_and_broadcast/1,update_session_status_and_broadcast/2,
-	update_session_request_and_broadcast/2,broadcast_data/2,store_session_data_request_and_broadcast/2]).
+	update_session_request_and_broadcast/2,broadcast_data/2,store_session_data_request_and_broadcast/2,broadcast_data_with_msg/3]).
 
 create_session_and_broadcast(SessionId)->
    lager:debug("In create session and broadcast with session id:~p",[SessionId]),
@@ -45,6 +45,15 @@ broadcast_data(SessionId,{error,Reason})->
 broadcast_data(SessionId,{ok,Data})->
 	lager:debug("Sending data to session:~p, data:~p",[SessionId,Data]),
 	gproc:send({p, l, {socket_session,SessionId}}, {self(), {socket_session,SessionId}, {ok,Data}}).
+
+
+broadcast_data_with_msg(SessionId,Msg,{error,Reason})->
+	lager:debug("Sending data to session:~p, data:~p",[SessionId,Reason]),
+	gproc:send({p, l, {socket_session,SessionId}}, {self(), {socket_session,SessionId}, {error,Msg,Reason}});
+
+broadcast_data_with_msg(SessionId,Msg,{ok,Data})->
+	lager:debug("Sending data to session:~p, data:~p",[SessionId,Data]),
+	gproc:send({p, l, {socket_session,SessionId}}, {self(), {socket_session,SessionId}, {ok,Msg,Data}}).
 
 
 

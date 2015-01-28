@@ -1,4 +1,5 @@
--module (m_etp_session_time_server).
+-module (m_etp_session_ghost_server).
+
 -export([start_link/1]).
 
 -behaviour(gen_server).
@@ -11,17 +12,17 @@
 -define(SERVER, ?MODULE).
 
 
--record(state,{session_timeout,clean_interval,tref}).
+-record(state,{ghost_timeout,clean_interval,tref}).
 
 
 start_link(Args) ->
 	gen_server:start_link(?MODULE, Args, []).
 
 %% @private
-init([{session_timeout,Timeout},{session_clean_after,CleanInterval}]) ->
-	lager:info("Setting session timeout to:~p ms,clean interval to:~p ms",[Timeout,CleanInterval]),
+init([{ghost_timeout,Timeout},{session_clean_after,CleanInterval}]) ->
+	lager:info("Sessing ghost timeout to:~p ms,clean interval to:~p ms",[Timeout,CleanInterval]),
 	TRef = erlang:start_timer(CleanInterval, self(), trigger),
-	{ok, #state{session_timeout=Timeout,clean_interval=CleanInterval,tref=TRef}}.
+	{ok, #state{ghost_timeout=Timeout,clean_interval=CleanInterval,tref=TRef}}.
 
 
 
@@ -37,7 +38,7 @@ handle_cast(_Msg, State) ->
 
 handle_info({timeout, _Ref, trigger}, State) ->
     timer:cancel(State#state.tref),
-    process_time_out_sessions(State#state.session_timeout),
+    process_ghost_sessions(State#state.ghost_timeout),
     TRef = erlang:start_timer(State#state.clean_interval, self(), trigger),
     NewState = State#state{tref = TRef},
     {noreply, NewState};
@@ -60,19 +61,19 @@ code_change(_OldVsn, State, _Extra) ->
 
 
 
-process_time_out_sessions(Timeout)->
-	lager:debug("Scanning for timed out sessions..."),
-	Sessions=get_timed_out_sessions(Timeout),
+process_ghost_sessions(Timeout)->
+	lager:debug("Scanning for ghost sessions..."),
+	Sessions=get_ghost_sessions(Timeout),
 	[m_etp_session_proxy:delete_session(X) || X <- Sessions],
 	[m_etp_session_data_proxy:delete_session_data(X) || X <-Sessions].
 
 
-get_timed_out_sessions(Timeout) ->
+get_ghost_sessions(Timeout) ->
 	TimeThreshold=m_etp_utils:get_utc_timestamp()-Timeout,
-	lager:debug("Cleaning out sessions that do not have state connected  and last_updated<~p",[TimeThreshold]),
+	lager:debug("Cleaning out ghost sessions that do not have any activity and last_updated<~p",[TimeThreshold]),
     Sessions=do(qlc:q([X#m_etp_session.session_id || X <- mnesia:table(m_etp_sessions),
 			     X#m_etp_session.updated < TimeThreshold 
-			     ,X#m_etp_session.status/=connected
+			     
 				])),
     Sessions.
     

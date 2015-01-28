@@ -1,7 +1,7 @@
 -module (m_etp_codec_utils).
 -include_lib("../m_etp_store/include/m_etp_data.hrl").
 
--export([decode_session_request2record_with_id/2,decode_json_protocol2record/1,decode_session_request2record/1]).
+-export([get_protocol_and_messagetype/1,decode_session_request2record_with_id/2,decode_json_protocol2record/1,decode_session_request2record/1,encode_open_session/1]).
 
 decode_json_protocol2record(Data)->
    try
@@ -75,6 +75,67 @@ decode_protocol_data(ProtocolData)->
 					capabilities=Capabilities
 	}.
 
+encode_open_session_old(_SessionId)->
+	Version=encode_version(),
+	[<<"TEST1">>,<<"SESSIONID">>,1,[1,0,0,0],<<"role">>,<<>>],
+	[<<"TEST1">>,<<"SESSIONID">>,[],<<"role">>,[]].
+	
+encode_version()->
+	VersionSchema={avro_record,'Version',
+                        [
+                            {<<"major">>,int},
+                            {<<"minor">>,int},
+                            {<<"revision">>,int},
+                            {<<"patch">>,int}
+                        ]
+                    },
+   Result=eavro:encode(VersionSchema,[1,0,0,0]),
+   lager:debug("Result of encode version:~p",[Result]),
+   Result.
+
+
+
+encode_open_session3(SessionId)->
+	Protocols=[
+
+		{1,[1,0,0,0],<<"producer">>},%channeldata
+		{1,[1,0,0,0],<<"consumer">>},%channeldata
+		{2,[1,0,0,0],<<"producer">>},%channeldataframe
+		{2,[1,0,0,0],<<"consumer">>},%channeldataframe
+		{4,[1,0,0,0],<<"producer">>},%store
+		{4,[1,0,0,0],<<"consumer">>}%store
+	],
+	[<<"M_ETP_SERVER">>,atom_to_binary(SessionId,utf8),
+		[[[encode_supported_protocol(X) || X <-Protocols]]]
+	].
+
+encode_open_session(SessionId)->
+	Protocols=[
+
+		{1,[1,0,0,0],<<"producer">>},%channeldata
+		{1,[1,0,0,0],<<"consumer">>},%channeldata
+		{2,[1,0,0,0],<<"producer">>},%channeldataframe
+		{2,[1,0,0,0],<<"consumer">>},%channeldataframe
+		{4,[1,0,0,0],<<"producer">>},%store
+		{4,[1,0,0,0],<<"consumer">>}%store
+	],
+	[<<"M_ETP_SERVER">>,atom_to_binary(SessionId,utf8),
+		[[encode_supported_protocol(X) || X <-Protocols]]
+	].
+
+encode_supported_protocol({ProtocolNumber,Version,Role})->
+	[
+				ProtocolNumber,
+				Version,
+				Role,
+				[]
+	].
+
 add_session_data(SessionId,Created,ApplicationName,SessionData)->
 	NewData=SessionData#m_etp_session_data{application_name=ApplicationName,session_id=SessionId,created=Created},
 	NewData.
+
+get_protocol_and_messagetype(<<"Energistics.Protocol.Core.OpenSession">>)->
+	{0,2}.
+
+
