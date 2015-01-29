@@ -29,8 +29,7 @@ handle_call({encode,binary_ocf,Data},_From,State)->
 handle_call({decode,binary_message_header,Data},_From,State)->
 	case State#state.messageheader of 
 		undefined -> 
-			{ok,HeaderSchema}=m_etp_protocol_proxy:get_protocol(<<"Energistics.Datatypes.MessageHeader">>),
-			CompiledSchema=HeaderSchema#m_etp_protocol.compiled_schema,
+			CompiledSchema=get_msg_header_schema(State),
 			NewState=State#state{messageheader=CompiledSchema},
 			Response=decode_data({binary,Data,CompiledSchema}),
 			{reply,Response,NewState};
@@ -38,6 +37,9 @@ handle_call({decode,binary_message_header,Data},_From,State)->
     		Response=decode_data({binary,Data,State#state.messageheader}),
     		{reply,Response,State}
     end;
+
+
+
 
  
 handle_call({decode,binary_protocol,Payload,{0,1}},_From,State)->
@@ -56,9 +58,9 @@ handle_call({decode,binary,Data,Schema},_From,State)->
 	Response=decode_data({binary,Data,Schema}),
     {reply,Response,State};
    
-handle_call({encode,binary_protocol,Payload,{0,2}},_From,State)->
+handle_call({encode,binary_protocol,Payload,{0,2},MsgHeader},_From,State)->
 	lager:debug("In encode opensession:~p",[Payload]),
-	process_encode(m_etp_protocol_proxy:get_protocol(<<"Energistics.Protocol.Core.OpenSession">>),Payload,State);
+	process_encode(m_etp_protocol_proxy:get_protocol(<<"Energistics.Protocol.Core.OpenSession">>),Payload,MsgHeader,State);
 
 handle_call({encode,binary,_Data,_Schema},_From,State)->
 	{reply,{ok},State};
@@ -88,19 +90,29 @@ code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
 
 
+get_msg_header_schema(State)->
+	case State#state.messageheader of 
+		undefined -> 
+			{ok,HeaderSchema}=m_etp_protocol_proxy:get_protocol(<<"Energistics.Datatypes.MessageHeader">>),
+			HeaderSchema#m_etp_protocol.compiled_schema;
+		_->
+		 State#state.messageheader
+    end.
 
-process_decode({ok,no_data_found},Payload,State)->
+process_decode({ok,no_data_found},_Payload,State)->
 	{reply,{error,unable_to_locate_requested_protocol},State};
 
 process_decode({ok,Schema},Payload,State) when is_atom(Schema)==false->
 	{reply,decode_data({binary,Payload,Schema#m_etp_protocol.compiled_schema}),State}.
 
 
-process_encode({ok,no_data_found},Payload,State)->
+process_encode({ok,no_data_found},_Payload,_MsgHeader,State)->
 	{reply,{error,unable_to_locate_requested_protocol},State};
 
-process_encode({ok,Schema},Payload,State) when is_atom(Schema)==false->
-	{reply,encode_data({binary,Payload,Schema#m_etp_protocol.compiled_schema}),State}.
+process_encode({ok,Schema},Payload,MsgHeader,State) when is_atom(Schema)==false->
+	PayloadRes=encode_data({binary,Payload,Schema#m_etp_protocol.compiled_schema}),
+
+	{reply,encode_header(PayloadRes,MsgHeader,State),State}.
 
 
 decode_data({binary,Data,Schema})->
@@ -124,9 +136,21 @@ decode_data({binary_ocf,Data})->
 		
 	end.
 
+encode_header({ok,PayLoad},MsgHeader,State)->
+	HeaderSchema=get_msg_header_schema(State),
+	PayLoadSchema=[HeaderSchema,bytes],
+	{_,EncodedHeader}=encode_data({binary,MsgHeader,HeaderSchema}),
+	lager:debug("Result of encoded header:~p",[EncodedHeader]),
+	%create one united message with concatenation to be used with avros datumreader
+	{ok,<<EncodedHeader/binary,PayLoad/binary>>};
+	%encode_data({binary,[MsgHeader,PayLoad],PayLoadSchema});
+
+encode_header({error,Reason},_MsgHeader,_State)->
+	{error,Reason}.
+
 encode_data({binary,Data,Schema})->
 	lager:debug("Encode data:~p",[Data]),
-	%lager:debug("Encode data with schema:~p",[Schema]),
+	lager:debug("Encode data with schema:~p",[Schema]),
     try eavro:encode(Schema,Data) of 
 		Result ->
 			{ok,Result}

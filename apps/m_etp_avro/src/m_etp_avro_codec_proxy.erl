@@ -24,8 +24,8 @@ decode({binary_ocf,Data})->
         					gen_server:call(Worker,{decode,binary_ocf,Data})
   	end).
 
-encode({binary_protocol,Payload,{Protocol,MessageType}})->
+encode({binary_protocol,Payload,{Protocol,MessageType},MsgHeader})->
   poolboy:transaction(m_etp_avro_codec_pool, fun(Worker) ->
-                  gen_server:call(Worker,{encode,binary_protocol,Payload,{Protocol,MessageType}})
+                  gen_server:call(Worker,{encode,binary_protocol,Payload,{Protocol,MessageType},MsgHeader})
     end).
 	

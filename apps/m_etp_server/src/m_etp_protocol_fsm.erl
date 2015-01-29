@@ -14,7 +14,7 @@ start_link(SessionId,Encoding)->
 
 init({SessionId,Encoding}) ->
     lager:debug("Init gen fsm with session id:~p and serialization type:~p",[SessionId,Encoding]),
-	{ok, disconnected, #state{sessionid=SessionId,encoding=Encoding}}.
+	{ok, disconnected, #state{sessionid=SessionId,encoding=Encoding,messageid=0}}.
 
 
 disconnected({connected},State)->
@@ -36,17 +36,17 @@ connected({closed},State)->
 
 
 
-connected({[Protocol,MessageType,_CorrelationId,MessageId,_MessageFlags],EnclosingMessage},State) when Protocol==0,MessageType==1-> 
+connected({[Protocol,MessageType,CorrelationId,MessageId,MessageFlags],EnclosingMessage},State) when Protocol==0,MessageType==1-> 
     lager:debug("Got data in connected state should be request session.."),
     % try to get the request session schema..
-    handle_protocol({Protocol,MessageType,MessageId,EnclosingMessage},State#state.encoding,State);
+    handle_protocol({[Protocol,MessageType,CorrelationId,MessageId,MessageFlags],EnclosingMessage},State#state.encoding,State);
 
 connected({[Protocol,MessageType,_CorrelationId,_MessageId,_MessageFlags],_EnclosingMessage},State) when Protocol/=0;MessageType/=1-> 
     lager:debug("Invalid message type recieved in connected state:Protocol,~p MessageType,~p",[Protocol,MessageType]),
     spawn_monitor(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,invalid_protocol_for_state}]).
 
 
-session_acknowledge({[Protocol,MessageType,_CorrelationId,MessageId,_MessageFlags],_EnclosingMessage},State)->
+session_acknowledge({[_Protocol,_MessageType,_CorrelationId,_MessageId,_MessageFlags],_EnclosingMessage},State)->
     spawn_monitor(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,invalid_protocol_for_state}]),
     {next_state,session_acknowledge,State};
 
@@ -127,7 +127,7 @@ code_change(_OldVsn, StateName, StateData, _Extra) ->
 
 
 
-handle_protocol({0,1,MessageId,EnclosingMessage},binary,State) ->
+handle_protocol({[0,1,CorrelationId,MessageId,MessageFlags],EnclosingMessage},binary,State) ->
     lager:debug("Processing request session with decoded message header and payload"),
     Result=m_etp_avro_codec_proxy:decode({binary_protocol,EnclosingMessage,{0,1}}),
     lager:debug("Result of decode payload:~p",[Result]),
@@ -135,22 +135,22 @@ handle_protocol({0,1,MessageId,EnclosingMessage},binary,State) ->
     %MessageData=m_etp_avro_codec_proxy:decode({binary_message_header,RequestData}),
     %lager:debug("Result of decode message data:~p",[MessageData]),
     %Result=m_etp_avro_codec_proxy:decode({binary,RequestData,Schema#m_etp_protocol.compiled_schema}),
-    process_result({Result,decode,binary,request_session,MessageId},State).
+    process_result({Result,decode,binary,[0,1,CorrelationId,MessageId,MessageFlags]},State).
     
 
 
 
 
 
-process_result({{error,Reason},decode,binary,_Type,_MessageId},State)->
+process_result({{error,Reason},decode,binary,[_MsgHeader]},State)->
     lager:error("Failed in decode:~p",[Reason]),
     spawn_monitor(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,failed_decode_binary}]),
     {next_state,connected,State};
 
 
 
-
-process_result({{ok,Decoded},decode,binary,request_session,MessageId},State)->
+%process request session data
+process_result({{ok,Decoded},decode,binary,[0,1,_CorrelationId,MessageId,MessageFlags]},State)->
     lager:debug("Decoded binary data:~p",[Decoded]),
     DecodedRecord=m_etp_codec_utils:decode_session_request2record_with_id(Decoded,State#state.sessionid),
     %start process to store session data request
@@ -159,9 +159,10 @@ process_result({{ok,Decoded},decode,binary,request_session,MessageId},State)->
     spawn_monitor(m_etp_session_process_handler,update_session_request_and_broadcast,[State#state.sessionid,Decoded]),
     %encode avro opensession request response
     OpenSessionData=m_etp_codec_utils:encode_open_session(State#state.sessionid),
+    MsgHeader=m_etp_codec_utils:encode_msg_header({0,2,MessageId,State#state.messageid,MessageFlags}),
     spawn_monitor(m_etp_session_process_handler,broadcast_data_with_msg,[State#state.sessionid,m_etp_open_session,
             m_etp_avro_codec_proxy:encode({binary_protocol,OpenSessionData,
-            m_etp_codec_utils:get_protocol_and_messagetype(<<"Energistics.Protocol.Core.OpenSession">>)})]),
+            m_etp_codec_utils:get_protocol_and_messagetype(<<"Energistics.Protocol.Core.OpenSession">>),MsgHeader})]),
     {next_state,in_session,State}.
     %{next_state,session_acknowledge,State}.
     %Result=m_etp_avro_codec_proxy:encode({binary_protocol,m_etp_codec_utils:encode_open_session(State#state.sessionid),m_etp_codec_utils:get_protocol_and_messagetype(<<"Energistics.Protocol.Core.OpenSession">>)}),

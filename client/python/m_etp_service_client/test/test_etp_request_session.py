@@ -21,7 +21,7 @@ class Test(unittest.TestCase):
             logging.debug("Serializing request data to avro ocf")
             tUtils.serializeRequestSessionToFile()
             dataToSend=fUtils.readFileToString(tUtils.get_test_storage()+"/"+tUtils.getRequestSessionAvroFileName())
-            ws=sConn.connect_service_socket(tUtils.get_servername(),"binary_ocf")
+            ws=sConn.connect_service_saocket(tUtils.get_servername(),"binary_ocf")
             ws.send_binary(dataToSend)
             #time.sleep(100)
             ws.close()
@@ -39,7 +39,7 @@ class Test(unittest.TestCase):
             ws.send_binary(dataToSend)
             result=ws.recv() 
             logging.debug("Got result:"+str(result))
-            ws.send_binary(dataToSend)
+            #ws.send_binary(dataToSend)
             ws.close()
             logging.debug("Closed session brutally...")
             pass

@@ -2,7 +2,7 @@
 -include_lib("../m_etp_store/include/m_etp_data.hrl").
 
 -export([get_protocol_and_messagetype/1,decode_session_request2record_with_id/2,decode_json_protocol2record/1,decode_session_request2record/1,encode_open_session/1]).
-
+-export([encode_msg_header/1]).
 decode_json_protocol2record(Data)->
    try
 		Decoded=jiffy:decode(Data),
@@ -75,11 +75,7 @@ decode_protocol_data(ProtocolData)->
 					capabilities=Capabilities
 	}.
 
-encode_open_session_old(_SessionId)->
-	Version=encode_version(),
-	[<<"TEST1">>,<<"SESSIONID">>,1,[1,0,0,0],<<"role">>,<<>>],
-	[<<"TEST1">>,<<"SESSIONID">>,[],<<"role">>,[]].
-	
+
 encode_version()->
 	VersionSchema={avro_record,'Version',
                         [
@@ -95,19 +91,6 @@ encode_version()->
 
 
 
-encode_open_session3(SessionId)->
-	Protocols=[
-
-		{1,[1,0,0,0],<<"producer">>},%channeldata
-		{1,[1,0,0,0],<<"consumer">>},%channeldata
-		{2,[1,0,0,0],<<"producer">>},%channeldataframe
-		{2,[1,0,0,0],<<"consumer">>},%channeldataframe
-		{4,[1,0,0,0],<<"producer">>},%store
-		{4,[1,0,0,0],<<"consumer">>}%store
-	],
-	[<<"M_ETP_SERVER">>,atom_to_binary(SessionId,utf8),
-		[[[encode_supported_protocol(X) || X <-Protocols]]]
-	].
 
 encode_open_session(SessionId)->
 	Protocols=[
@@ -122,6 +105,9 @@ encode_open_session(SessionId)->
 	[<<"M_ETP_SERVER">>,atom_to_binary(SessionId,utf8),
 		[[encode_supported_protocol(X) || X <-Protocols]]
 	].
+
+encode_msg_header({Protocol,MessageType,CorrelationId,MessageId,MessageFlags})->
+	[Protocol,MessageType,CorrelationId,MessageId,MessageFlags].
 
 encode_supported_protocol({ProtocolNumber,Version,Role})->
 	[
