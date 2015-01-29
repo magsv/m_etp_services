@@ -121,7 +121,7 @@ websocket_info({_PID,{socket_session,_SessionId},{error,_,Reason}},Req,State)->
 websocket_info({_PID,{socket_session,_SessionId},{ok,StateMode,Data}},Req,State)->
     lager:debug("Got avro data in statemode:~p,",[StateMode]),
     %just write it out
-    file:write_file("/media/magnus/hdd_1/projects/erlang/energistics/test_avro/opensession_encode_srv_with_header.avro",Data),
+    %file:write_file("/media/magnus/hdd_1/projects/erlang/energistics/test_avro/opensession_encode_srv_with_header.avro",Data),
     {reply, {binary, Data}, Req, State};
 
 
