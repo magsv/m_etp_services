@@ -38,7 +38,9 @@ class Test(unittest.TestCase):
             ws=sConn.connect_service_socket(tUtils.get_servername(),"binary")
             ws.send_binary(dataToSend)
             result=ws.recv() 
-            logging.debug("Got result:"+str(result))
+           
+            header=tUtils.getMessageHeaderFromBinary(result)
+            logging.debug("Got header:"+str(header))
             #ws.send_binary(dataToSend)
             ws.close()
             logging.debug("Closed session brutally...")
