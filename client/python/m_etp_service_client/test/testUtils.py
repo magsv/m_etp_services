@@ -90,6 +90,10 @@ def serializeRequestSessionToBinaryFile():
         aUtils.serializeDataToBinaryFileWithHeader(headerSchema,requestSessionSchema,headerData,sessionData,outputFile)
         #aUtils.serializeDataToBinaryFile(requestSessionSchema, outputFile,sessionData)
 
+def getMessageHeaderFromBinary(binaryData):
+		headerSchema=get_message_header_protocol()
+		msgHeader=aUtils.deserializeBinaryFromStream(headerSchema,binaryData)
+		return msgHeader
 
 def getSessionRequestDataToSend():
 	serializeRequestSessionToFile()
