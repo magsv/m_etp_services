@@ -41,7 +41,7 @@ def deserializeBinaryFromStream(schemaFile,binaryData):
 	schema=parse_schema(schemaFile)
 	reader = avro.io.DatumReader(schema)
 	data = reader.read(decoder)
-	return data
+	return data 
 
 def deserializeBinaryFromStreamWithHeader(headerSchemaFile,dataSchema,binaryData):
 

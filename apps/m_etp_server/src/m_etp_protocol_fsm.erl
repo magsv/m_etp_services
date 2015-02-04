@@ -34,7 +34,9 @@ connected({closed},State)->
     lager:debug("FSM state move into closed awaiting possible rewake or clean"),
     {next_state,disconnected,State};
 
-
+connected({[0,5,_,_,_],_EnclosingMessage},State)->
+    lager:debug("Got disconnect call, cleaning up..."),
+    {stop, normal, State};
 
 connected({[Protocol,MessageType,CorrelationId,MessageId,MessageFlags],EnclosingMessage},State) when Protocol==0,MessageType==1-> 
     lager:debug("Got data in connected state should be request session.."),
@@ -45,6 +47,10 @@ connected({[Protocol,MessageType,_CorrelationId,_MessageId,_MessageFlags],_Enclo
     lager:debug("Invalid message type recieved in connected state:Protocol,~p MessageType,~p",[Protocol,MessageType]),
     spawn_monitor(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,invalid_protocol_for_state}]).
 
+
+session_acknowledge({[0,5,_,_,_],_EnclosingMessage},State)->
+    lager:debug("Got disconnect call, cleaning up..."),
+    {stop, normal, State};
 
 session_acknowledge({[_Protocol,_MessageType,_CorrelationId,_MessageId,_MessageFlags],_EnclosingMessage},State)->
     spawn_monitor(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,invalid_protocol_for_state}]),
@@ -66,7 +72,9 @@ in_session({[0,5,_,_,_],_EnclosingMessage},State)->
     lager:debug("Got disconnect call, cleaning up..."),
     {stop, normal, State};
 
-
+in_session({hibernating},State)->
+    lager:debug("FSM state move into hibernation awaiting rewake or clean,sessionId:~p",[State#state.sessionid]),
+    {next_state,hibernating,State};
 
 in_session(Event,State)->
     lager:debug("Got event:~p in in_session state",[Event]),

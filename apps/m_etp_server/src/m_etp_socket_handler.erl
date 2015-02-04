@@ -95,6 +95,15 @@ websocket_info({post_init,Encoding}, Req, State) ->
             {ok, Req, NewState}
     end;
 
+
+websocket_info({_PID,{update_session_status,_},{ok,_Record},disconnected},Req,State)->
+    lager:debug("Session disconnected.."),
+    {shutdown, Req, State};
+
+websocket_info({_PID,{update_session_status,_},{error,Reason},_},Req,State)->
+    lager:error("Failed in update session status:~p",[Reason]),
+    {ok,Req,State};
+
 websocket_info({_PID,{socket_session,_},{ok,{m_etp_session,StoredSession,_,_,_,_,_}}},Req,State)->
     lager:debug("Got ok session created and stored:~p,",[StoredSession]),
     {ok,Req,State};
@@ -138,11 +147,11 @@ websocket_terminate({remote,_,_},_Req,State)->
     gen_fsm:send_event(State#state.session_id,{hibernating});
 
 websocket_terminate({normal,shutdown},_Req,State)->
-    lager:debug("Server peer closed session,cleaning up"),
-    spawn(m_etp_session_proxy,delete_session,[State#state.session_id]),
-    gen_fsm:send_all_state_event(State#state.session_id,{stop}),
-    timer:sleep(100), 
-    m_etp_protocol_fsm_sup:remove_session(State#state.session_id);
+    lager:debug("Closed session,cleaning up"),
+    clean_session_data(State#state.session_id);
+    %gen_fsm:send_all_state_event(State#state.session_id,{stop}),
+    %timer:sleep(100),
+
 
 websocket_terminate(Reason, _Req, State) ->
 
@@ -151,5 +160,16 @@ websocket_terminate(Reason, _Req, State) ->
     spawn(m_etp_session_process_handler,update_session_status_and_broadcast,[State#state.session_id,hibernating]),
     gen_fsm:send_event(State#state.session_id,{hibernating}),
 	ok.
+
+
+clean_session_data(SessionId)->
+    lager:debug("Cleaning out session data.."),
+    spawn(m_etp_session_proxy,delete_session,[SessionId]),
+    spawn(m_etp_session_data_proxy,delete_session_data,[SessionId]),
+    lager:debug("Removing session from process tree"),
+    gproc:unreg({p, l, {socket_session,SessionId}}),
+    lager:debug("Removing session from supervisor tree"), 
+    m_etp_protocol_fsm_sup:remove_session(SessionId).
+
 
 
