@@ -43,6 +43,18 @@ def deserializeBinaryFromStream(schemaFile,binaryData):
 	data = reader.read(decoder)
 	return data
 
+def deserializeBinaryFromStreamWithHeader(headerSchemaFile,dataSchema,binaryData):
+
+	bytes_reader = io.BytesIO(binaryData)
+	decoder = avro.io.BinaryDecoder(bytes_reader)
+	headerSchema=parse_schema(headerSchemaFile)
+	dataSchema=parse_schema(dataSchema)
+	reader = avro.io.DatumReader(headerSchema)
+	header = reader.read(decoder)
+	datareader=avro.io.DatumReader(dataSchema)
+	data=datareader.read(decoder)
+	return {'header':header,'data':data}
+
 
 
 def serializeDataToBinaryFile(schemaFile,outputFile,dataToSerialize):

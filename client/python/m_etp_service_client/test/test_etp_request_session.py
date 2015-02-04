@@ -39,9 +39,17 @@ class Test(unittest.TestCase):
             ws.send_binary(dataToSend)
             result=ws.recv() 
            
-            header=tUtils.getMessageHeaderFromBinary(result)
+            #header=tUtils.getMessageHeaderFromBinary(result)
+            decoded=tUtils.getHeaderAndSessionFromBinary(result)
+            header=decoded['header']
+            data=decoded['data']
             logging.debug("Got header:"+str(header))
-            #ws.send_binary(dataToSend)
+            logging.debug("Got data:"+str(data))
+            logging.debug("Sending close session")
+            tUtils.serializeCloseSessionToBinaryFile()
+            dataToSend=fUtils.readFileToString(tUtils.get_test_storage()+"/"+tUtils.getCloseSessionAvroFileNameBinary())
+            ws.send_binary(dataToSend)
+            result=ws.recv() 
             ws.close()
             logging.debug("Closed session brutally...")
             pass

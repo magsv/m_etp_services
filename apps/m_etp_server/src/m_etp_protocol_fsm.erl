@@ -62,8 +62,11 @@ session_acknowledge({error,Reason},State)->
     {next_state,in_session,State}.
 
 
-in_session({close_session},State)->
-    {next_state,disconnected,State};
+in_session({[0,5,_,_,_],_EnclosingMessage},State)->
+    lager:debug("Got disconnect call, cleaning up..."),
+    {stop, normal, State};
+
+
 
 in_session(Event,State)->
     lager:debug("Got event:~p in in_session state",[Event]),
@@ -107,6 +110,11 @@ handle_info(Info, StateName, StateData) ->
     lager:debug("Recieved info event:~p",[Info]),
     {next_state, StateName, StateData}.
 
+
+terminate(normal, _StateName, State) ->
+    lager:debug("Gen fsm told to shutdown down due to close session, cleaning up..."),
+    spawn(m_etp_session_process_handler,update_session_status_and_broadcast,[State#state.sessionid,disconnected]),
+    ok;
 
 
 terminate(Reason, _StateName, State) ->

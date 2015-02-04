@@ -64,6 +64,9 @@ code_change(_OldVsn, State, _Extra) ->
 process_ghost_sessions(Timeout)->
 	lager:debug("Scanning for ghost sessions..."),
 	Sessions=get_ghost_sessions(Timeout),
+	GhostSessionData=get_ghost_session_data(),
+	lager:debug("Got ghost session data:~p",[GhostSessionData]),
+	[m_etp_session_data_proxy:delete_session_data(X) || X <-GhostSessionData],
 	[m_etp_session_proxy:delete_session(X) || X <- Sessions],
 	[m_etp_session_data_proxy:delete_session_data(X) || X <-Sessions].
 
@@ -76,7 +79,15 @@ get_ghost_sessions(Timeout) ->
 			     
 				])),
     Sessions.
-    
+
+%check so that we do not have entries in session data that are not represented
+%in session store table
+get_ghost_session_data()->
+	Handle = do(qlc:q([X#m_etp_session_data.session_id || X <- mnesia:table(m_etp_session_data),
+                                   Y <- mnesia:table(m_etp_sessions),
+                                   X#m_etp_session_data.session_id /= Y#m_etp_session.session_id 
+    ])),
+    Handle.
 
 do(Q) ->
     F = fun() -> qlc:e(Q) end,

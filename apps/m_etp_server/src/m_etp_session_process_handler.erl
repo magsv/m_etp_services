@@ -12,7 +12,7 @@ update_session_status_and_broadcast(SessionId,Status)->
 	lager:debug("In update session status and broadcast with session id:~p, status: ~p",[SessionId,Status]),
 	Result=m_etp_session_proxy:update_session_status(SessionId,Status),
 	lager:debug("Result of update session status:~p",[Result]),
-	gproc:send({p, l, {socket_session,SessionId}}, {self(), {socket_session,SessionId}, Result}).
+	gproc:send({p, l, {socket_session,SessionId}}, {self(), {update_session_status,SessionId}, Result,Status}).
 
 update_session_request_and_broadcast(SessionId,SessionRequest)->
 	lager:debug("In update session request and broadcast with session id:~p, session_request: ~p",[SessionId,SessionRequest]),
@@ -28,6 +28,9 @@ store_session_data_request_and_broadcast(SessionId,SessReqRecList)->
 		false ->
 			broadcast_data(SessionId,{ok,session_data_request_stored})
 	end.
+
+
+
 
 get_valid_session_protocols_and_broadcast(SessionId)->
 	ok.

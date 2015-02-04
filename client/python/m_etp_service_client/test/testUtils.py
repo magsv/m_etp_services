@@ -11,6 +11,12 @@ def get_requestsession_protocol():
 def get_message_header_protocol():
 	return schemaFolder+'Energistics.Datatypes.MessageHeader.avsc'
 
+def get_opensession_protocol():
+	return schemaFolder+'Energistics.Protocol.Core.OpenSession.avsc'
+
+def get_closesession_protocol():
+	return schemaFolder+'Energistics.Protocol.Core.CloseSession.avsc'
+
 def get_request_session_test_data():
 	return {u'applicationName': u'TESTAPPLICATIONNAME', 
 	u'requestedProtocols': [
@@ -24,6 +30,8 @@ def get_request_session_test_data():
 	u'patch': 0, u'minor': 0, u'revision': 0}}
 							]
 		}
+def get_closesession_test_data(reason):
+	return {u'reason':'NOT_DEFINED'}
 
 def get_messsage_header(protocol,correlationId,messageType,messageId,messageFlags=0):
 	return {u'messageFlags': 0, 
@@ -74,6 +82,9 @@ def getRequestSessionAvroFileName():
 def getRequestSessionAvroFileNameBinary():
 	return "requestSession_test_binary.avro"
 
+def getCloseSessionAvroFileNameBinary():
+	return "closeSession_test_binary.avro"
+
 
 def serializeRequestSessionToFile():
     	requestSessionSchema=get_requestsession_protocol()
@@ -85,15 +96,31 @@ def serializeRequestSessionToBinaryFile():
         headerSchema=get_message_header_protocol()
     	requestSessionSchema=get_requestsession_protocol()
     	outputFile=get_test_storage()+"/"+getRequestSessionAvroFileNameBinary()
-    	headerData=get_messsage_header(0,0,1,2)
+    	headerData=get_messsage_header(0,0,1,1)
         sessionData=get_request_session_test_data_dict2()
         aUtils.serializeDataToBinaryFileWithHeader(headerSchema,requestSessionSchema,headerData,sessionData,outputFile)
         #aUtils.serializeDataToBinaryFile(requestSessionSchema, outputFile,sessionData)
 
+def serializeCloseSessionToBinaryFile():
+        headerSchema=get_message_header_protocol()
+    	closeSessionSchema=get_closesession_protocol()
+    	outputFile=get_test_storage()+"/"+getCloseSessionAvroFileNameBinary()
+    	headerData=get_messsage_header(0,0,5,1)
+        closeData=get_closesession_test_data('NOT_DEFINED')
+        aUtils.serializeDataToBinaryFileWithHeader(headerSchema,closeSessionSchema,headerData,closeData,outputFile)
+        #aUtils.serializeDataToBinaryFile(requestSessionSchema, outputFile,sessionData)      
+
 def getMessageHeaderFromBinary(binaryData):
 		headerSchema=get_message_header_protocol()
+
 		msgHeader=aUtils.deserializeBinaryFromStream(headerSchema,binaryData)
 		return msgHeader
+
+def getHeaderAndSessionFromBinary(binaryData):
+		headerSchema=get_message_header_protocol()
+		opensessionSchema=get_opensession_protocol()
+		result=aUtils.deserializeBinaryFromStreamWithHeader(headerSchema,opensessionSchema,binaryData)
+		return result
 
 def getSessionRequestDataToSend():
 	serializeRequestSessionToFile()
