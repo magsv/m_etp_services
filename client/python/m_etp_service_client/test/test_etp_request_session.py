@@ -16,21 +16,33 @@ class Test(unittest.TestCase):
         pass
 
 
-    '''def testEstablishRequestSessionOCF(self):
-    	try:
-            logging.debug("Serializing request data to avro ocf")
-            tUtils.serializeRequestSessionToFile()
-            dataToSend=fUtils.readFileToString(tUtils.get_test_storage()+"/"+tUtils.getRequestSessionAvroFileName())
-            ws=sConn.connect_service_saocket(tUtils.get_servername(),"binary_ocf")
+    def testEstablishRequestSessionWithFaultyReqSessionData(self):
+        try:
+            logging.debug("Testing failure of send binary and not correct request session")
+           
+            dataToSend=bytearray(b"Hello World")
+            ws=sConn.connect_service_socket(tUtils.get_servername(),"binary")
             ws.send_binary(dataToSend)
-            #time.sleep(100)
-            ws.close()
-            logging.debug("Closed session brutally...")
+            ws.recv() 
+           
+            #header=tUtils.getMessageHeaderFromBinary(result)
+            '''decoded=tUtils.getHeaderAndSessionFromBinary(result)
+            header=decoded['header']
+            data=decoded['data']
+            logging.debug("Got header:"+str(header))
+            logging.debug("Got data:"+str(data))
+            logging.debug("Sending close session")
+            tUtils.serializeCloseSessionToBinaryFile()
+            dataToSend=fUtils.readFileToString(tUtils.get_test_storage()+"/"+tUtils.getCloseSessionAvroFileNameBinary())
+            ws.send_binary(dataToSend)
+            result=ws.recv() 
+            ws.close()'''
+            
             pass
         except Exception, e:
-    		self.fail("Error:"+str(e))'''
+            self.fail("Error:"+str(e))
 
-    def testEstablishRequestSessionBinary(self):
+    '''def testEstablishRequestSessionBinary(self):
         try:
             logging.debug("Serializing request data to avro binary without schema")
             tUtils.serializeRequestSessionToBinaryFile()
@@ -39,7 +51,7 @@ class Test(unittest.TestCase):
             ws.send_binary(dataToSend)
             result=ws.recv() 
            
-            #header=tUtils.getMessageHeaderFromBinary(result)
+           
             decoded=tUtils.getHeaderAndSessionFromBinary(result)
             header=decoded['header']
             data=decoded['data']
@@ -51,10 +63,10 @@ class Test(unittest.TestCase):
             ws.send_binary(dataToSend)
             result=ws.recv() 
             ws.close()
-            logging.debug("Closed session brutally...")
+            
             pass
         except Exception, e:
-            self.fail("Error:"+str(e))
+            self.fail("Error:"+str(e))'''
        
 
 
