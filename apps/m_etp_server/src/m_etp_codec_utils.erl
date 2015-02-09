@@ -2,7 +2,7 @@
 -include_lib("../m_etp_store/include/m_etp_data.hrl").
 
 -export([get_protocol_and_messagetype/1,decode_session_request2record_with_id/2,decode_json_protocol2record/1,decode_session_request2record/1,encode_open_session/1]).
--export([encode_msg_header/1]).
+-export([encode_msg_header/1,encode_error/2]).
 decode_json_protocol2record(Data)->
    try
 		Decoded=jiffy:decode(Data),
@@ -90,7 +90,8 @@ encode_version()->
    Result.
 
 
-
+encode_error(ErrorCode,ErrorMessage)->
+	[ErrorCode,ErrorMessage].
 
 encode_open_session(SessionId)->
 	Protocols=[

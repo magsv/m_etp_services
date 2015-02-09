@@ -62,6 +62,19 @@ handle_call({encode,binary_protocol,Payload,{0,2},MsgHeader},_From,State)->
 	lager:debug("In encode opensession:~p",[Payload]),
 	process_encode(m_etp_protocol_proxy:get_protocol(<<"Energistics.Protocol.Core.OpenSession">>),Payload,MsgHeader,State);
 
+%encode error message
+handle_call({encode,binary_protocol,Payload,{0,1000},MsgHeader},_From,State)->
+	lager:debug("Ecoding error"),
+	case MsgHeader of 
+		undefined ->
+			%this is an early message due to failure prior to any msg headers
+			ok;
+		_ ->
+		 	%should encode with msg header
+			ok
+	end;
+
+
 handle_call({encode,binary,_Data,_Schema},_From,State)->
 	{reply,{ok},State};
 
@@ -113,6 +126,7 @@ process_encode({ok,Schema},Payload,MsgHeader,State) when is_atom(Schema)==false-
 	PayloadRes=encode_data({binary,Payload,Schema#m_etp_protocol.compiled_schema}),
 
 	{reply,encode_header(PayloadRes,MsgHeader,State),State}.
+
 
 
 decode_data({binary,Data,Schema})->

@@ -22,7 +22,8 @@ attach_session(SessionId,Encoding) ->
 remove_session(SessionId)->
 	lager:debug("Removing session with id:~p from supervision",[SessionId]),
 	Result=supervisor:delete_child(?MODULE,SessionId),
-	lager:debug("Result of remove child from supervisor:~p",[Result]).
+	lager:debug("Result of remove child from supervisor:~p",[Result]),
+	Result.
 
 init([]) ->
 	{ok, { {one_for_one, 5, 10}, []} }.

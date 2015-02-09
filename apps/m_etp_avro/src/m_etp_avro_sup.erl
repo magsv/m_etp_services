@@ -23,7 +23,7 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
-    Processes=[get_avro_codec_pool()],
+    Processes=[get_avro_codec_pool(),get_avro_func_pool()],
     {ok, { {one_for_one, 5, 10}, Processes} }.
 
 
@@ -35,4 +35,15 @@ get_avro_codec_pool()->
 			  {worker_module, m_etp_avro_codec_srv}]++PoolCnfg,
 	Result=poolboy:child_spec(m_etp_avro_codec_pool, PoolArgs, WorkerArgs),
 	Result.
+
+
+get_avro_func_pool()->
+	{ok, PoolCnfgArgs} = application:get_env(m_etp_avro, m_etp_avro_func_pool),
+	[{pool_cnfg,PoolCnfg},
+	 {worker_args,[WorkerArgs]}]=PoolCnfgArgs,
+	PoolArgs=[{name, {local, m_etp_avro_func_pool}},
+			  {worker_module, m_etp_avro_func_srv}]++PoolCnfg,
+	Result=poolboy:child_spec(m_etp_avro_func_pool, PoolArgs, WorkerArgs),
+	Result.
+
 

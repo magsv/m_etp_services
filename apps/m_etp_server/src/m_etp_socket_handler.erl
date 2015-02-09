@@ -72,7 +72,7 @@ websocket_handle(Data, Req, State) ->
 	{ok, Req, State}.
 
 websocket_info({decode_payload,{ok,Payload}},Req,State)->
-    lager:debug("Decoded message payload:~p",[Payload]),
+    
     gen_fsm:send_event(State#state.session_id,Payload),
     {ok,Req,State};
 
@@ -113,16 +113,24 @@ websocket_info({_PID,{socket_session,_},{ok,session_data_request_stored}},Req,St
     %{reply, {text, <<"Everything is ok">>}, Req, State};
     {ok,Req,State};
 
-websocket_info({_PID,{socket_session,_SessionId},{error,Msg}},Req,State)->
-    lager:debug("Got message broadcast error:~p,",[Msg]),
+%handle invalid protocol errors
+websocket_info({_PID,{socket_session,_SessionId},{error,invalid_protocol_for_state}},Req,State)->
+    lager:debug("Processing invalid Protocol for state..."),
     %need to respond with an error message
+
+    {shutdown, Req, State};
+
+websocket_info({_PID,{socket_session,_SessionId},{error,Msg}},Req,State)->
+    lager:debug("Got message broadcast error1:~p,",[Msg]),
+    %need to respond with an error message
+
     {shutdown, Req, State};
 
 
 
 %handle incoming binary avro response data to write to socket
 websocket_info({_PID,{socket_session,_SessionId},{error,_,Reason}},Req,State)->
-    lager:debug("Got message broadcast error:~p,",[Reason]),
+    lager:debug("Got message broadcast error2:~p,",[Reason]),
     %need to respond with an error message
     {shutdown, Req, State};
 
@@ -169,7 +177,19 @@ clean_session_data(SessionId)->
     lager:debug("Removing session from process tree"),
     gproc:unreg({p, l, {socket_session,SessionId}}),
     lager:debug("Removing session from supervisor tree"), 
-    m_etp_protocol_fsm_sup:remove_session(SessionId).
+    case m_etp_protocol_fsm_sup:remove_session(SessionId) of 
+        {error,_}   ->
+            %seems to be running send stop event and shutdown
+            gen_fsm:send_all_state_event(SessionId,{stop}),
+            timer:sleep(100),
+            m_etp_protocol_fsm_sup:remove_session(SessionId);
+        _->
+            ok
+    end.
+
+
+create_error_response(Reason)->
+    ok.
 
 
 

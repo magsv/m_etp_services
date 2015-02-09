@@ -45,14 +45,15 @@ connected({[Protocol,MessageType,CorrelationId,MessageId,MessageFlags],Enclosing
 
 connected({[Protocol,MessageType,_CorrelationId,_MessageId,_MessageFlags],_EnclosingMessage},State) when Protocol/=0;MessageType/=1-> 
     lager:debug("Invalid message type recieved in connected state:Protocol,~p MessageType,~p",[Protocol,MessageType]),
-    spawn_monitor(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,invalid_protocol_for_state}]).
+    spawn_monitor(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,invalid_protocol_for_state}]),
+    {next_state,connected,State}.
 
 
 session_acknowledge({[0,5,_,_,_],_EnclosingMessage},State)->
     lager:debug("Got disconnect call, cleaning up..."),
     {stop, normal, State};
 
-session_acknowledge({[_Protocol,_MessageType,_CorrelationId,_MessageId,_MessageFlags],_EnclosingMessage},State)->
+session_acknowledge({[Protocol,MessageType,_CorrelationId,_MessageId,_MessageFlags],_EnclosingMessage},State) when Protocol/=0;MessageType/=5->
     spawn_monitor(m_etp_session_process_handler,broadcast_data,[State#state.sessionid,{error,invalid_protocol_for_state}]),
     {next_state,session_acknowledge,State};
 
