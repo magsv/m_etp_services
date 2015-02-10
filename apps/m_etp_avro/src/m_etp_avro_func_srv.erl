@@ -20,15 +20,36 @@ init(_Args) ->
 
 
 handle_call({encode_open_session,{SessionId}}, _From, State) ->
-	{reply, {error, unknown_call}, State};
+    Data=m_etp_codec_utils:encode_open_session(SessionId),
+    {reply, Data, State};
 
 
 handle_call({encode_msg_header,{Protocol,MessageType,CorrelationId,MessageId,MessageFlags}}, _From, State) ->
-	{reply, {error, unknown_call}, State};
+	Data=m_etp_codec_utils:encode_msg_header({Protocol,MessageType,CorrelationId,MessageId,MessageFlags}),
+	{reply, Data, State};
 
 
 handle_call({encode_error,{ErrorCode,ErrorMessage}}, _From, State) ->
-	{reply, {error, unknown_call}, State};
+	Data=m_etp_codec_utils:encode_error(ErrorCode,ErrorMessage),
+	{reply, Data, State};
+
+handle_call({decode_session_request_to_record,{SessionRequest,SessionId}}, _From, State) ->
+	Data=m_etp_codec_utils:decode_session_request2record_with_id(SessionRequest,SessionId),
+	{reply, Data, State};
+
+handle_call({decode_session_request_to_record,{SessionRequest}}, _From, State) ->
+	Data=m_etp_codec_utils:decode_session_request2record(SessionRequest),
+	{reply, Data, State};
+
+handle_call({get_protocol_and_messageType,<<"Energistics.Protocol.Core.OpenSession">>}, _From, State) ->
+	{reply, {0,2}, State};
+
+handle_call({decode_etp_protocol2record,Data}, _From, State) ->
+	Result=m_etp_codec_utils:decode_json_protocol2record(Data),
+	{reply, Result, State};
+
+
+
 
 %% @private
 handle_call(_Request, _From, State) ->

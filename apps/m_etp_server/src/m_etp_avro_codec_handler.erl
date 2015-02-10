@@ -63,7 +63,7 @@ handle_result(Body,Req,State,HTTPCode)->
 process_result({ok,Decoded},Req,State)->
 	{Data,_BinaryBuff}=Decoded,
 	lager:debug("Got decoded result:~p",[Data]),
-	{_,Result}=m_etp_avro_codec_proxy:encode({binary_protocol,Data,m_etp_codec_utils:get_protocol_and_messagetype(<<"Energistics.Protocol.Core.OpenSession">>)}),
+	{_,Result}=m_etp_avro_codec_proxy:encode({binary_protocol,Data,m_etp_avro_codec_proxy:get_protocol_and_messagetype(<<"Energistics.Protocol.Core.OpenSession">>)}),
 	lager:debug("Result of encode:~p",[Result]),
 	file:write_file("/media/magnus/hdd_1/projects/erlang/energistics/test_avro/opensession_encode_srv.avro",Result),
 	lager:debug("Wrote result:"),

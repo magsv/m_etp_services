@@ -169,19 +169,17 @@ process_result({{error,Reason},decode,binary,[_MsgHeader]},State)->
 %process request session data
 process_result({{ok,Decoded},decode,binary,[0,1,_CorrelationId,MessageId,MessageFlags]},State)->
     lager:debug("Decoded binary data:~p",[Decoded]),
-    DecodedRecord=m_etp_codec_utils:decode_session_request2record_with_id(Decoded,State#state.sessionid),
+    DecodedRecord=m_etp_avro_codec_proxy:decode_session_request_to_record({Decoded,State#state.sessionid}),
     %start process to store session data request
     spawn_monitor(m_etp_session_process_handler,store_session_data_request_and_broadcast,[State#state.sessionid,DecodedRecord]),
     %start process to update session request status
     spawn_monitor(m_etp_session_process_handler,update_session_request_and_broadcast,[State#state.sessionid,Decoded]),
     %encode avro opensession request response
-    OpenSessionData=m_etp_codec_utils:encode_open_session(State#state.sessionid),
-    MsgHeader=m_etp_codec_utils:encode_msg_header({0,2,MessageId,State#state.messageid,MessageFlags}),
+    OpenSessionData=m_etp_avro_codec_proxy:encode_open_session({State#state.sessionid}),
+    MsgHeader=m_etp_avro_codec_proxy:encode_msg_header({0,2,MessageId,State#state.messageid,MessageFlags}),
     spawn_monitor(m_etp_session_process_handler,broadcast_data_with_msg,[State#state.sessionid,m_etp_open_session,
             m_etp_avro_codec_proxy:encode({binary_protocol,OpenSessionData,
-            m_etp_codec_utils:get_protocol_and_messagetype(<<"Energistics.Protocol.Core.OpenSession">>),MsgHeader})]),
+            m_etp_avro_codec_proxy:get_protocol_and_messagetype(<<"Energistics.Protocol.Core.OpenSession">>),MsgHeader})]),
     {next_state,in_session,State}.
-    %{next_state,session_acknowledge,State}.
-    %Result=m_etp_avro_codec_proxy:encode({binary_protocol,m_etp_codec_utils:encode_open_session(State#state.sessionid),m_etp_codec_utils:get_protocol_and_messagetype(<<"Energistics.Protocol.Core.OpenSession">>)}),
-    %lager:debug("Result of encode session:~p",[Result]).
+    
 

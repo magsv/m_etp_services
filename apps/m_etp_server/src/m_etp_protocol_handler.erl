@@ -75,15 +75,19 @@ process_delete_response({error,Reason},Req,State)->
 process_post_body(true,<<"POST">>,Req,State)->
     case cowboy_req:body_qs(Req) of
 		{ok,[{Data,_}],Req3}->
-			RecordData=m_etp_codec_utils:decode_json_protocol2record(Data),
+
+			RecordData=m_etp_avro_codec_proxy:decode_etp_json_protocol(Data),
+			
 			case RecordData of 
 				{ok,ProtocolRecord}->
 					process_result(m_etp_protocol_proxy:create_protocol(ProtocolRecord),Req3,State);
 				{error,Reason}->
+					lager:debug("Decoded record:~p",[RecordData]),
 					handle_result({error,Reason},Req3,State,500)
 			end;
 		{error,Reason,Req3}->
 			lager:debug("Error post"),
+
 			handle_result({error,Reason},Req3,State,500)
 	end;
 
@@ -92,7 +96,7 @@ process_post_body(true,<<"POST">>,Req,State)->
 process_post_body(true,<<"PUT">>,Req,State)->
     case cowboy_req:body_qs(Req) of
 		{ok,[{Data,_}],Req3}->
-			RecordData=m_etp_codec_utils:decode_json_protocol2record(Data),
+			RecordData=m_etp_avro_codec_proxy:decode_etp_json_protocol(Data),
 			case RecordData of 
 				{ok,ProtocolRecord}->
 					process_result(m_etp_protocol_proxy:update_protocol(ProtocolRecord),Req3,State);

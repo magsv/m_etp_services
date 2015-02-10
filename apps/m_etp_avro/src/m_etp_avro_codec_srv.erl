@@ -62,6 +62,10 @@ handle_call({encode,binary_protocol,Payload,{0,2},MsgHeader},_From,State)->
 	lager:debug("In encode opensession:~p",[Payload]),
 	process_encode(m_etp_protocol_proxy:get_protocol(<<"Energistics.Protocol.Core.OpenSession">>),Payload,MsgHeader,State);
 
+
+
+
+
 %encode error message
 handle_call({encode,binary_protocol,Payload,{0,1000},MsgHeader},_From,State)->
 	lager:debug("Ecoding error"),
