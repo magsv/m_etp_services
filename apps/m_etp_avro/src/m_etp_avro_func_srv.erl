@@ -18,6 +18,18 @@ init(_Args) ->
 	lager:info("Started m_etp_avro_func srv..."),
 	{ok, undefined}.
 
+
+handle_call({encode_open_session,{SessionId}}, _From, State) ->
+	{reply, {error, unknown_call}, State};
+
+
+handle_call({encode_msg_header,{Protocol,MessageType,CorrelationId,MessageId,MessageFlags}}, _From, State) ->
+	{reply, {error, unknown_call}, State};
+
+
+handle_call({encode_error,{ErrorCode,ErrorMessage}}, _From, State) ->
+	{reply, {error, unknown_call}, State};
+
 %% @private
 handle_call(_Request, _From, State) ->
 	{reply, {error, unknown_call}, State}.
