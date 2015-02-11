@@ -1,0 +1,13 @@
+{
+  "type" : "record",
+  "name" : "GetResources",
+  "namespace" : "Energistics.Protocol.Discovery",
+  "fields" : [ {
+    "name" : "uri",
+    "type" : "string"
+  } ],
+  "messageType" : "1",
+  "protocol" : "3",
+  "fullName" : "Energistics.Protocol.Discovery.GetResources",
+  "depends" : [ ]
+}

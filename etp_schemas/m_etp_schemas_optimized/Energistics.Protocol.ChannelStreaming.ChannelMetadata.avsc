@@ -15,7 +15,7 @@
           "type" : "string"
         }, {
           "name" : "channelId",
-          "type" : "int"
+          "type" : "long"
         }, {
           "name" : "indexes",
           "type" : {
@@ -37,7 +37,7 @@
                 "type" : "string"
               }, {
                 "name" : "datum",
-                "type" : [ "string", "null" ]
+                "type" : [ "null", "string" ]
               }, {
                 "name" : "direction",
                 "type" : {
@@ -49,16 +49,57 @@
                 }
               }, {
                 "name" : "mnemonic",
-                "type" : [ "string", "null" ]
+                "type" : [ "null", "string" ]
               }, {
                 "name" : "description",
-                "type" : [ "string", "null" ]
+                "type" : [ "null", "string" ]
               }, {
                 "name" : "uri",
-                "type" : [ "string", "null" ]
+                "type" : [ "null", "string" ]
+              }, {
+                "name" : "customData",
+                "type" : {
+                  "type" : "map",
+                  "values" : {
+                    "type" : "record",
+                    "name" : "DataValue",
+                    "namespace" : "Energistics.Datatypes",
+                    "fields" : [ {
+                      "name" : "item",
+                      "type" : [ "null", "double", "float", "int", "long", "string", {
+                        "type" : "record",
+                        "name" : "DateTime",
+                        "fields" : [ {
+                          "name" : "time",
+                          "type" : "long"
+                        }, {
+                          "name" : "offset",
+                          "type" : "float"
+                        } ],
+                        "fullName" : "Energistics.Datatypes.DateTime",
+                        "depends" : [ ],
+                        "aliases" : [ "etp.dt" ]
+                      }, {
+                        "type" : "record",
+                        "name" : "ArrayOfDouble",
+                        "fields" : [ {
+                          "name" : "values",
+                          "type" : {
+                            "type" : "array",
+                            "items" : "double"
+                          }
+                        } ],
+                        "fullName" : "Energistics.Datatypes.ArrayOfDouble",
+                        "depends" : [ ]
+                      }, "boolean" ]
+                    } ],
+                    "fullName" : "Energistics.Datatypes.DataValue",
+                    "depends" : [ "Energistics.Datatypes.DateTime", "Energistics.Datatypes.ArrayOfDouble" ]
+                  }
+                }
               } ],
               "fullName" : "Energistics.Datatypes.ChannelData.IndexMetadataRecord",
-              "depends" : [ "Energistics.Datatypes.ChannelData.ChannelIndexTypes", "Energistics.Datatypes.ChannelData.IndexDirections" ]
+              "depends" : [ "Energistics.Datatypes.ChannelData.ChannelIndexTypes", "Energistics.Datatypes.ChannelData.IndexDirections", "Energistics.Datatypes.DataValue" ]
             }
           }
         }, {
@@ -72,32 +113,19 @@
           "type" : "string"
         }, {
           "name" : "startIndex",
-          "type" : [ {
+          "type" : [ "null", {
             "type" : "record",
             "name" : "IndexValue",
             "fields" : [ {
               "name" : "item",
-              "type" : [ {
-                "type" : "record",
-                "name" : "DateTime",
-                "namespace" : "Energistics.Datatypes",
-                "fields" : [ {
-                  "name" : "time",
-                  "type" : "long"
-                }, {
-                  "name" : "offset",
-                  "type" : "float"
-                } ],
-                "fullName" : "Energistics.Datatypes.DateTime",
-                "depends" : [ ]
-              }, "double", "long" ]
+              "type" : [ "Energistics.Datatypes.DateTime", "double", "long" ]
             } ],
             "fullName" : "Energistics.Datatypes.ChannelData.IndexValue",
             "depends" : [ "Energistics.Datatypes.DateTime" ]
-          }, "null" ]
+          } ]
         }, {
           "name" : "endIndex",
-          "type" : [ "IndexValue", "null" ]
+          "type" : [ "null", "IndexValue" ]
         }, {
           "name" : "description",
           "type" : "string"
@@ -110,9 +138,55 @@
             "fullName" : "Energistics.Datatypes.ChannelData.ChannelStatuses",
             "depends" : [ ]
           }
+        }, {
+          "name" : "objectMetadata",
+          "type" : [ "null", {
+            "type" : "record",
+            "name" : "Resource",
+            "namespace" : "Energistics.Datatypes.Object",
+            "fields" : [ {
+              "name" : "namespace",
+              "type" : "string"
+            }, {
+              "name" : "uri",
+              "type" : "string"
+            }, {
+              "name" : "name",
+              "type" : "string"
+            }, {
+              "name" : "version",
+              "type" : "string"
+            }, {
+              "name" : "channelSubscribable",
+              "type" : "boolean"
+            }, {
+              "name" : "objectType",
+              "type" : "string"
+            }, {
+              "name" : "customData",
+              "type" : {
+                "type" : "map",
+                "values" : "string"
+              }
+            }, {
+              "name" : "resourceType",
+              "type" : "string"
+            }, {
+              "name" : "hasChildren",
+              "type" : "int"
+            }, {
+              "name" : "uuid",
+              "type" : [ "null", "string" ]
+            }, {
+              "name" : "lastChanged",
+              "type" : "Energistics.Datatypes.DateTime"
+            } ],
+            "fullName" : "Energistics.Datatypes.Object.Resource",
+            "depends" : [ "Energistics.Datatypes.DateTime" ]
+          } ]
         } ],
         "fullName" : "Energistics.Datatypes.ChannelData.ChannelMetadataRecord",
-        "depends" : [ "Energistics.Datatypes.ChannelData.IndexMetadataRecord", "Energistics.Datatypes.ChannelData.IndexValue", "Energistics.Datatypes.ChannelData.IndexValue", "Energistics.Datatypes.ChannelData.ChannelStatuses" ]
+        "depends" : [ "Energistics.Datatypes.ChannelData.IndexMetadataRecord", "Energistics.Datatypes.ChannelData.IndexValue", "Energistics.Datatypes.ChannelData.IndexValue", "Energistics.Datatypes.ChannelData.ChannelStatuses", "Energistics.Datatypes.Object.Resource" ]
       }
     }
   } ],

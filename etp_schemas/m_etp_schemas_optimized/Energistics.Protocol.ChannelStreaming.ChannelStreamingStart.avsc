@@ -12,7 +12,7 @@
         "namespace" : "Energistics.Datatypes.ChannelData",
         "fields" : [ {
           "name" : "channelId",
-          "type" : "int"
+          "type" : "long"
         }, {
           "name" : "startIndex",
           "type" : {
@@ -37,7 +37,8 @@
                       "type" : "float"
                     } ],
                     "fullName" : "Energistics.Datatypes.DateTime",
-                    "depends" : [ ]
+                    "depends" : [ ],
+                    "aliases" : [ "etp.dt" ]
                   }, "double", "long" ]
                 } ],
                 "fullName" : "Energistics.Datatypes.ChannelData.IndexValue",

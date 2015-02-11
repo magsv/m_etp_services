@@ -52,7 +52,7 @@
               "name" : "DataValue",
               "fields" : [ {
                 "name" : "item",
-                "type" : [ "double", "float", "int", "long", "string", {
+                "type" : [ "null", "double", "float", "int", "long", "string", {
                   "type" : "record",
                   "name" : "DateTime",
                   "fields" : [ {
@@ -63,8 +63,9 @@
                     "type" : "float"
                   } ],
                   "fullName" : "Energistics.Datatypes.DateTime",
-                  "depends" : [ ]
-                }, "null", {
+                  "depends" : [ ],
+                  "aliases" : [ "etp.dt" ]
+                }, {
                   "type" : "record",
                   "name" : "ArrayOfDouble",
                   "fields" : [ {

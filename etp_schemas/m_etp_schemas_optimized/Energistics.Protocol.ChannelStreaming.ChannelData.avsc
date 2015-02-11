@@ -31,7 +31,8 @@
                     "type" : "float"
                   } ],
                   "fullName" : "Energistics.Datatypes.DateTime",
-                  "depends" : [ ]
+                  "depends" : [ ],
+                  "aliases" : [ "etp.dt" ]
                 }, "double", "long" ]
               } ],
               "fullName" : "Energistics.Datatypes.ChannelData.IndexValue",
@@ -40,7 +41,7 @@
           }
         }, {
           "name" : "channelId",
-          "type" : "int"
+          "type" : "long"
         }, {
           "name" : "value",
           "type" : {
@@ -49,7 +50,7 @@
             "namespace" : "Energistics.Datatypes",
             "fields" : [ {
               "name" : "item",
-              "type" : [ "double", "float", "int", "long", "string", "DateTime", "null", {
+              "type" : [ "null", "double", "float", "int", "long", "string", "DateTime", {
                 "type" : "record",
                 "name" : "ArrayOfDouble",
                 "fields" : [ {

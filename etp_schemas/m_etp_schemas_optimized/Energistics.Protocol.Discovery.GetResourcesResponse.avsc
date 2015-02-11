@@ -1,0 +1,70 @@
+{
+  "type" : "record",
+  "name" : "GetResourcesResponse",
+  "namespace" : "Energistics.Protocol.Discovery",
+  "fields" : [ {
+    "name" : "resource",
+    "type" : {
+      "type" : "record",
+      "name" : "Resource",
+      "namespace" : "Energistics.Datatypes.Object",
+      "fields" : [ {
+        "name" : "namespace",
+        "type" : "string"
+      }, {
+        "name" : "uri",
+        "type" : "string"
+      }, {
+        "name" : "name",
+        "type" : "string"
+      }, {
+        "name" : "version",
+        "type" : "string"
+      }, {
+        "name" : "channelSubscribable",
+        "type" : "boolean"
+      }, {
+        "name" : "objectType",
+        "type" : "string"
+      }, {
+        "name" : "customData",
+        "type" : {
+          "type" : "map",
+          "values" : "string"
+        }
+      }, {
+        "name" : "resourceType",
+        "type" : "string"
+      }, {
+        "name" : "hasChildren",
+        "type" : "int"
+      }, {
+        "name" : "uuid",
+        "type" : [ "null", "string" ]
+      }, {
+        "name" : "lastChanged",
+        "type" : {
+          "type" : "record",
+          "name" : "DateTime",
+          "namespace" : "Energistics.Datatypes",
+          "fields" : [ {
+            "name" : "time",
+            "type" : "long"
+          }, {
+            "name" : "offset",
+            "type" : "float"
+          } ],
+          "fullName" : "Energistics.Datatypes.DateTime",
+          "depends" : [ ],
+          "aliases" : [ "etp.dt" ]
+        }
+      } ],
+      "fullName" : "Energistics.Datatypes.Object.Resource",
+      "depends" : [ "Energistics.Datatypes.DateTime" ]
+    }
+  } ],
+  "messageType" : "2",
+  "protocol" : "3",
+  "fullName" : "Energistics.Protocol.Discovery.GetResourcesResponse",
+  "depends" : [ "Energistics.Datatypes.Object.Resource" ]
+}

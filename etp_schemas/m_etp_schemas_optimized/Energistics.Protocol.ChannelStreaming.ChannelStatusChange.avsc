@@ -4,7 +4,7 @@
   "namespace" : "Energistics.Protocol.ChannelStreaming",
   "fields" : [ {
     "name" : "channelId",
-    "type" : "int"
+    "type" : "long"
   }, {
     "name" : "status",
     "type" : {

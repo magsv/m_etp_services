@@ -1,0 +1,13 @@
+{
+  "type" : "record",
+  "name" : "GetObject",
+  "namespace" : "Energistics.Protocol.Store",
+  "fields" : [ {
+    "name" : "uri",
+    "type" : "string"
+  } ],
+  "messageType" : "1",
+  "protocol" : "4",
+  "fullName" : "Energistics.Protocol.Store.GetObject",
+  "depends" : [ ]
+}

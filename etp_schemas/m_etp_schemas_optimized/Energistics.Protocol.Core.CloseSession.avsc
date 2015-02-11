@@ -4,7 +4,7 @@
   "namespace" : "Energistics.Protocol.Core",
   "fields" : [ {
     "name" : "reason",
-    "type" : [ "string", "null" ]
+    "type" : [ "null", "string" ]
   } ],
   "messageType" : "5",
   "protocol" : "0",

@@ -7,7 +7,7 @@
     "type" : "string"
   }, {
     "name" : "fromIndex",
-    "type" : [ {
+    "type" : [ "null", {
       "type" : "record",
       "name" : "IndexValue",
       "namespace" : "Energistics.Datatypes.ChannelData",
@@ -25,15 +25,16 @@
             "type" : "float"
           } ],
           "fullName" : "Energistics.Datatypes.DateTime",
-          "depends" : [ ]
+          "depends" : [ ],
+          "aliases" : [ "etp.dt" ]
         }, "double", "long" ]
       } ],
       "fullName" : "Energistics.Datatypes.ChannelData.IndexValue",
       "depends" : [ "Energistics.Datatypes.DateTime" ]
-    }, "null" ]
+    } ]
   }, {
     "name" : "toIndex",
-    "type" : [ "Energistics.Datatypes.ChannelData.IndexValue", "null" ]
+    "type" : [ "null", "Energistics.Datatypes.ChannelData.IndexValue" ]
   } ],
   "messageType" : "1",
   "protocol" : "2",
