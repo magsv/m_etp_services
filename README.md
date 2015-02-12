@@ -21,7 +21,7 @@ Prerequisites
 
 The current library can be built following the instructions below or the supplied dockerfile can be used to create a **Docker** image with everything preinstalled ready to be tested following the docker instructions below.
 
-Setup with a clean install
+Setup with a clean install on localhost
 ================
 
 The procedure below is based on that you will not perform an release of the application but rather run it directly on a single node.
@@ -61,13 +61,13 @@ Setup using Docker - first time
 5. Open up a localhost browser instance and enter http://localhost:8080/ping -> this should give you a response back from the erlang server...
 
 Setup using Docker -- after image has been build
-====================
+------------------------
 
 1. Run **make docker_run_bash** to connect to the bash of the image
 2. Run **make m_etp_server** to start the server
 
 Possible issues with Docker
-====================
+------------------------
 
 If Docker complains about that the port is already in user upon connecting through bash, make sure that you stop all running containers with:
 
