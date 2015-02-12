@@ -11,8 +11,10 @@ decode_json_protocol2record(Data)->
 		MessageType=ej:get({"messageType"},Decoded),
 		ProtocolNo=ej:get({"protocol"},Decoded),
 		NameSpace=ej:get({"namespace"},Decoded),
+
 		lager:debug("Parsing schema eavro"),
 		CompiledSchema=eavro:parse_schema(Data),
+		lager:debug("Result of compiled schema:~p",[CompiledSchema]),
 		lager:debug("Parsed schema..."),
 		FullName=erlang:iolist_to_binary([NameSpace,<<".">>, Name]),
 		ETPProtocolRecord=#m_etp_protocol{

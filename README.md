@@ -49,10 +49,30 @@ Setup mnesia
 6. Enter **mnesia:start()** -> this will start mnesia again
 7. Enter **m_etp_store_init_tables:create_tables([node()]).** -> this will create the required tables in mnesia and the operation should return ok
 8. You are now ready to load some data....
+9. Run **make load_protocols** -> this will load the avro required schemas
 
-Setup using Docker
+Setup using Docker - first time
 ====================
 
-1. Run **make docker_build_image** -> this will create a new image with Ubuntu 14.04 and all of the required software including this library.
-2. Run **make docker_run_bash** to connect to the bash of the newly created image
+1. Run **make docker_prepare** -> this will copy files to be used in the container
+2. Run **make docker_build_image** -> this will create a new image with Ubuntu 14.04 and all of the required software including this library.
+3. Run **make docker_run_bash** to connect to the bash of the newly created image
+4. To create the Mnesia schemas follow the **Setup mnesia** part
+5. Open up a localhost browser instance and enter http://localhost:8080/ping -> this should give you a response back from the erlang server...
+
+Setup using Docker -- after image has been build
+====================
+
+1. Run **make docker_run_bash** to connect to the bash of the image
+2. Run **make m_etp_server** to start the server
+
+Possible issues with Docker
+====================
+
+If Docker complains about that the port is already in user upon connecting through bash, make sure that you stop all running containers with:
+
+**sudo docker stop --time=10 $(docker ps -a -q)**
+
+
+
 

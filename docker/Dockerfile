@@ -69,4 +69,9 @@ RUN rm -rf /tmp/*
 RUN mkdir /development
 WORKDIR /development
 
+##COPY CODE
+COPY docker_cp /development
+RUN make deps
+RUN make clean
+RUN make
 

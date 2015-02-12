@@ -4,7 +4,7 @@ MNESIA_DIR:=$(PWD)/mnesia_dir
 APP_CNFG:=/$(PWD)/apps/m_etp_store/priv/app.config
 OPTIMIZED_SCHEMAS_DIR:=$(PWD)/etp_schemas/m_etp_schemas_optimized
 SERVER_NAME:=http://localhost:8080
-AVRO_WILD_CARD:=$(wildcard $(OPTIMIZED_SCHEMAS_DIR:%=%/*.avsc))
+AVRO_WILD_CARD:=$(wildcard $(OPTIMIZED_SCHEMAS_DIR:%=%/*Energistics.Protocol.ChannelDataFrame.ChannelMetadata*.avsc))
 
 .PHONY: deps
 
@@ -49,14 +49,44 @@ load_protocols:
 		curl -X POST -d @$$file -H "Content-type:application/json" $(SERVER_NAME)/m_etp_protocol_service;\
 	done
 
+docker_prepare:
+	rm -rf docker/docker_cp
+	mkdir docker/docker_cp; 
+	cp -R ./apps docker/docker_cp
+	cp -R ./etp_schemas docker/docker_cp
+	cp Makefile docker/docker_cp
+	cp rebar docker/docker_cp
+	cp rebar.config docker/docker_cp
+
+docker_clean_prepare:
+	rm -rf docker/docker_cp	
+
 docker_build_image:
 	sudo docker build -t m_etp_server ./docker/.
+
+docker_build_image_force:
+	sudo docker build --no-cache=true --force-rm=true -t m_etp_server ./docker/.
 
 docker_list_images:
 	sudo docker images 
 
 docker_run_bash:
-	sudo docker run -t -i m_etp_server /bin/bash
+	sudo docker run -p 127.0.0.1:8080:8080 -t -i m_etp_server /bin/bash
+
+docker_remove_image:
+	sudo docker rmi m_etp_server:latest
+
+docker_list_running_containers:
+	sudo docker ps
+
+docker_stop_all_containers:
+	for entry in (docker ps -a -q); \
+	do \
+		sudo docker stop --time=10 $$entry;\
+	done
+	
+
+
 
 
 
