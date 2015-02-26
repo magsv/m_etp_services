@@ -4,6 +4,7 @@ MNESIA_DIR:=$(PWD)/mnesia_dir
 APP_CNFG:=/$(PWD)/apps/m_etp_store/priv/app.config
 OPTIMIZED_SCHEMAS_DIR:=$(PWD)/etp_schemas/m_etp_schemas_optimized
 SERVER_NAME:=http://localhost:8080
+NODE_NAME=m_etp@magnus-desktop
 AVRO_WILD_CARD:=$(wildcard $(OPTIMIZED_SCHEMAS_DIR:%=%/*Energistics.Protocol.ChannelDataFrame.ChannelMetadata*.avsc))
 
 .PHONY: deps
@@ -35,7 +36,7 @@ docs:
 	@erl -noshell -run edoc_run application '$(APP)' '"."' '[]'
 
 erlconnect:
-	@erl -sname remotetest -remsh 'm_etp@magnus-desktop'
+	@erl -sname remotetest -remsh '$(NODE_NAME)'
 
 
 
@@ -80,11 +81,11 @@ docker_list_running_containers:
 	sudo docker ps
 
 docker_stop_all_containers:
-	for entry in (docker ps -a -q); \
+	for file in $(AVRO_WILD_CARD); \
 	do \
-		sudo docker stop --time=10 $$entry;\
+		curl -X POST -d @$$file -H "Content-type:application/json" $(SERVER_NAME)/m_etp_protocol_service;\
 	done
-	
+	sudo docker stop --time=10 $(docker ps -a -q)
 
 
 
