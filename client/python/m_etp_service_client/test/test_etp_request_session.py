@@ -16,7 +16,7 @@ class Test(unittest.TestCase):
         pass
 
 
-    '''def testEstablishRequestSessionWithFaultyReqSessionData(self):
+    def testEstablishRequestSessionWithFaultyReqSessionData(self):
         try:
             logging.debug("Testing failure of send binary and not correct request session")
            
@@ -29,7 +29,7 @@ class Test(unittest.TestCase):
             
             pass
         except Exception, e:
-            self.fail("Error:"+str(e))'''
+            self.fail("Error:"+str(e))
 
     def testEstablishRequestSessionBinary(self):
         try:
