@@ -3,11 +3,11 @@ m_etp_services
 
 Background
 --------------
-The following repository is a test bed for the Energistics specification for next generation of data transfer protocol (ETP). It has been developed as part of testing the early specification and focuses on utilising other technologies than plain Java, #C or JavaScript. 
+The following repository is a **early** test bed for the Energistics specification for next generation of data transfer protocol (ETP). It has been developed as part of testing the early specification and focuses on utilising other technologies than plain Java, #C or JavaScript. 
 
 Development status
 -------------------
-The current library is a early test bed implementation and focuses on testing out the underlying technology as part of the current [Energistics ETP](http://www.energistics.org/standards-portfolio/energistics-transfer-protocol) specification which utilises websockets and Apache Avro to defined the data transfer protocol.   
+The current library is a **early** test bed implementation and focuses on testing out the underlying technology as part of the current [Energistics ETP](http://www.energistics.org/standards-portfolio/energistics-transfer-protocol) specification which utilises websockets and Apache Avro to defined the data transfer protocol.   
 The server test implementation is done in **Erlang** which is a language which is very well suited for this challenge. To demonstrate the language neutrality of the specification a python client has been used to test the Erlang server implementation.  
 The server is currently implemented with cowboy as a front end and utilising mnesia as the backing session storage. For each connection a fsm is spawned keeping track of the different states as visible as part of the ETP specification.  
 For the moment no errors from the backend is propagated back to the calling client as this has yet not been defined in the specification as well as how to handle session survailability in case of e.g. a network glitch. In case of a breakdown or that the calling client suddenly ends the websocket communication, the actual session will survive as part of the mnesia storage backend (utilising in memory and disk storage).  
@@ -38,6 +38,7 @@ Python client setup
 -------------------------
 
 The unit test client and python client library requires the python **websocket-client** library together with the **Apache Avro** python libraries. To install them using pip run ->  **pip install websocket-client**, **pip install avro**
+In order to test the python sample code you would need to edit the testUtils.py file and update the it with the correct schema paths..
 
 
 Building the Erlang code
@@ -85,7 +86,8 @@ If Docker complains about that the port is already in user upon connecting throu
 Inspecting the Erlang node
 ==========================
 
-You can at any time connect to the running node and inspect the status of the processes and Mnesia by using **make erlconnect**. Note though that you will need to update the node name in the make file prior to this....
+You can at any time connect to the running node and inspect the status of the processes and Mnesia by using **make erlconnect**. Note though that you will need to update the **NODE_NAME** variable in the make file prior to this.
+After you have run make erlconnect you should be connected to the running node and just use **observer:start().** to open up the observer console to inspect mnesia tables and running processes.
 
 Services
 =========================
