@@ -3,7 +3,7 @@ m_etp_services
 
 Background
 --------------
-The following repository is a **early** test bed for the Energistics specification for next generation of data transfer protocol (ETP). It has been developed as part of testing the early specification and focuses on utilising other technologies than plain Java, #C or JavaScript. In addition erlang is very well suited for this setup and has a nice fit to be used on e.g. embedded small devices.
+The following repository is a **early** test bed for the Energistics specification for next generation of data transfer protocol (ETP). It has been developed as part of testing the early specification and focuses on utilising other technologies than plain Java, #C or JavaScript. In addition erlang is very well suited for this setup with its stability and performance characteristics and has a nice fit to be used on e.g. embedded small devices.
 
 Development status
 -------------------
